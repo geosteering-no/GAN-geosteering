@@ -2,6 +2,13 @@ from GAN import GanLog
 import numpy as np
 import csv
 from scipy.linalg import block_diag
+import os,sys
+home = os.path.expanduser("~") # os independent home
+sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/KERNEL'))
+sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/USER_SERGEY'))
+sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering'))
+from vector_to_image import GanEvaluator
+from run_model_clean import DnnEvaluatorMcwd
 
 keys = {'bit_pos': [int(el) for el in range(64)],
          'vec_size': 60,
@@ -12,6 +19,12 @@ keys = {'bit_pos': [int(el) for el in range(64)],
 my_gan = GanLog(keys)
 numpy_input = np.load('../../gan-geosteering/saves/chosen_realization_C1.npz')
 numpy_single = numpy_input['arr_0']
+
+my_gan.gan_evaluator = GanEvaluator(my_gan.file_name, my_gan.vec_size)
+my_gan.mcwd_evaluator = DnnEvaluatorMcwd(
+            trained_model_directory=os.path.join(home,
+                                                 'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746'),
+            experiment_name="Adaptive_architecture_2")
 
 modelresponse = my_gan.call_sim(state={'m':numpy_single})[1]
 
