@@ -7,9 +7,10 @@ from copy import deepcopy
 home = os.path.expanduser("~") # os independent home
 
 # local load of additional modules.
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/KERNEL'))
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/USER_SERGEY'))
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering'))
+sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
+sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
+sys.path.append('../../gan-geosteering')
+
 import mcwd_converter
 from vector_to_image import GanEvaluator
 from run_model_clean import DnnEvaluatorMcwd
