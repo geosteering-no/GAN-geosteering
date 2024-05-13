@@ -9,9 +9,10 @@ USE a virtual environment and update pip and setup-tools
 
 Install the following:
 1. PET: https://github.com/Python-Ensemble-Toolbox/PET
+* Including the setup of PET in your **virtual environment**, which can be done by running `python3 -m pip install -e .` in the PET folder.
 2. MCWD tool: https://gitlab.com/mshahriarish/deep-borehole-inverse-problem.git
   - Use branch "workingAdaptiveFull"
-4. GAN tool: https://github.com/alin256/gan-geosteering-prestudy-internal
+3. GAN tool: https://github.com/alin256/gan-geosteering-prestudy-internal
 
 Note: Downgrade scikit-learn to v0.22 !
 
