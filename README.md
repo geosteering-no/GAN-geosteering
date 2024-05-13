@@ -18,7 +18,7 @@ Note: Downgrade scikit-learn to v0.22 !
 # Initiallize
 1. Initialize the simulator to fit with PET by instructions in [GAN/README.md](GAN/README.md)
 
-   1.1 Note: Fix all paths in the GAN/GAN.py
+   1.1 Note: Fix all paths in the [GAN/GAN.py](GAN/GAN.py)
 3. Generate the data by running python data/write_data_var.py
 
    2.1 Note: remember to fix all paths in write_data_var.py
