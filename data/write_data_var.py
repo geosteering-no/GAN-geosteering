@@ -1,29 +1,37 @@
-from GAN import GanLog
 import numpy as np
 import csv
 from scipy.linalg import block_diag
 import os,sys
 
-sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
-sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
-sys.path.append('../../gan-geosteering')
+# adjust relative path
+if __name__ == '__main__':
+    prefix = '../'
+else:
+    prefix = ''
+
+sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
+sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
+sys.path.append(prefix + '../gan-geosteering')
+
+from GAN import GanLog
 
 from vector_to_image import GanEvaluator
 from run_model_clean import DnnEvaluatorMcwd
 
 keys = {'bit_pos': [int(el) for el in range(64)],
-         'vec_size': 60,
+        'vec_size': 60,
         'reporttype': 'pos',
         'reportpoint': [int(el) for el in range(64)],
-        'datatype': [f'res{el}' for el in range(1,14)]}
+        'datatype': [f'res{el}' for el in range(1,14)],
+        'file_name': prefix+'../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'}
 
 my_gan = GanLog(keys)
-numpy_input = np.load('../../gan-geosteering/saves/chosen_realization_C1.npz')
+numpy_input = np.load(prefix + '../gan-geosteering/saves/chosen_realization_C1.npz')
 numpy_single = numpy_input['arr_0']
 
 my_gan.gan_evaluator = GanEvaluator(my_gan.file_name, my_gan.vec_size)
 my_gan.mcwd_evaluator = DnnEvaluatorMcwd(
-            trained_model_directory='../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
+            trained_model_directory=prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
             experiment_name="Adaptive_architecture_2")
 
 modelresponse = my_gan.call_sim(state={'m':numpy_single})[1]

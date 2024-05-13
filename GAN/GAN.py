@@ -4,13 +4,18 @@ Wrap the GAN earth model parametrization and the ML logging tool into a PET comp
 import numpy as np
 import os,sys,threading
 from copy import deepcopy
-home = os.path.expanduser("~") # os independent home
 
-# local load of additional modules.
-sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
-sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
-sys.path.append('../../gan-geosteering')
-# TODO check paths here
+# adjust relative path
+if __name__ == '__main__':
+    prefix = '../'
+    # local load of additional modules.
+    # paths are relative to the GAN-geosteering root
+    sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
+    sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
+    sys.path.append(prefix + '../gan-geosteering')
+    # TODO check paths here
+
+
 
 
 import mcwd_converter
@@ -30,7 +35,7 @@ class GanLog:
         if input_dict is not None and "file_name" in input_dict:
             self.file_name = input_dict["file_name"]
         else:
-            self.file_name = '../../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
+            self.file_name = prefix+'../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
 
         if input_dict is not None and "vec_size" in input_dict:
             self.vec_size = int(input_dict["vec_size"])
@@ -106,7 +111,7 @@ class GanLog:
 
         self.gan_evaluator = GanEvaluator(self.file_name, self.vec_size)
         self.mcwd_evaluator = DnnEvaluatorMcwd(
-            trained_model_directory='../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
+            trained_model_directory=prefix+'../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
             experiment_name="Adaptive_architecture_2")
         # TODO check paths here
 
@@ -175,7 +180,7 @@ class GanLog:
 #             'vec_size': 60}
 #
 #     my_gan = logGan(keys)
-#     numpy_input = np.load('../gan-geosteering/saves/chosen_realization_C1.npz')
+#     numpy_input = np.load(prefix+'../gan-geosteering/saves/chosen_realization_C1.npz')
 #     numpy_single = numpy_input['arr_0']
 #
 #
