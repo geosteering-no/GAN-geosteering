@@ -11,7 +11,7 @@ Install the following:
 1. PET: https://github.com/Python-Ensemble-Toolbox/PET
 2. MCWD tool: https://gitlab.com/mshahriarish/deep-borehole-inverse-problem.git
   - Use branch "workingAdaptiveFull"
-4. GAN tool: https://git.openlab.iris.no/seal/gan-geosteering.git
+4. GAN tool: https://github.com/alin256/gan-geosteering-prestudy-internal
 
 Note: Downgrade scikit-learn to v0.22 !
 
