@@ -8,7 +8,10 @@ USE a virtual environment and update pip and setup-tools
 Install the following:
 1. PET: https://github.com/Python-Ensemble-Toolbox/PET
 2. MCWD tool: https://gitlab.com/mshahriarish/deep-borehole-inverse-problem.git
-3. GAN tool: https://git.openlab.iris.no/seal/gan-geosteering.git
+  - Use branch "workingAdaptiveFull"
+4. GAN tool: https://git.openlab.iris.no/seal/gan-geosteering.git
+
+Note: Downgrade scikit-learn to v0.22 !
 
 # Initiallize
 1. Initialize the simulator to fit with PET by instructions in GAN/README.md
