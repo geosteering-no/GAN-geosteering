@@ -10,6 +10,8 @@ home = os.path.expanduser("~") # os independent home
 sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
 sys.path.append('../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
 sys.path.append('../../gan-geosteering')
+# TODO check paths here
+
 
 import mcwd_converter
 from vector_to_image import GanEvaluator
@@ -28,7 +30,7 @@ class GanLog:
         if input_dict is not None and "file_name" in input_dict:
             self.file_name = input_dict["file_name"]
         else:
-            self.file_name = os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth')
+            self.file_name = '../../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
 
         if input_dict is not None and "vec_size" in input_dict:
             self.vec_size = int(input_dict["vec_size"])
@@ -104,9 +106,9 @@ class GanLog:
 
         self.gan_evaluator = GanEvaluator(self.file_name, self.vec_size)
         self.mcwd_evaluator = DnnEvaluatorMcwd(
-            trained_model_directory=os.path.join(home,
-                                                 'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746'),
+            trained_model_directory='../../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
             experiment_name="Adaptive_architecture_2")
+        # TODO check paths here
 
         for ind in self.l_prim:
             for key in self.all_data_types:
