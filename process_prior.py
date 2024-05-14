@@ -12,7 +12,7 @@ from vector_to_image import GanEvaluator
 gan_file_name = '../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
 gan_vec_size = 60
 
-channel_for_channel_body = 1
+
 
 gan_evaluator = GanEvaluator(gan_file_name, gan_vec_size)
 
@@ -50,13 +50,14 @@ tensor = rounded_model
 # Initialize the result tensor with zeros
 
 
+channel_for_channel_body = 1
+channel_for_crevasse = 2
+
 def calculate_body_sizes(single_earth_model_2d):
     # renaming
     tensor = single_earth_model_2d
 
     result_matrix = np.zeros_like(tensor[1, :, :], dtype=float)
-
-
 
     # Calculate connected channel-body sizes
     for w in range(tensor.shape[2]):
@@ -85,7 +86,7 @@ def calculate_body_sizes(single_earth_model_2d):
 
 result_matrix = calculate_body_sizes(rounded_model)
 
-almost_zero = 2 ** -1
+almost_zero = 2 ** -2
 visualization_matrix = (np.log2(result_matrix+almost_zero))
 
 # Visualizing the original and result tensors for the first channel
