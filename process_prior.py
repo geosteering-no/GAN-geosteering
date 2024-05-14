@@ -27,28 +27,30 @@ print(earth_model[:,:,0])
 rounded_model = np.where(earth_model >= 0, 1, 0)
 print(rounded_model[:,:,0])
 
-# shale
-plt.figure(10)
-plt.imshow(rounded_model[0,:,:])
-plt.colorbar()
-
-# channel
-plt.figure(11)
-plt.imshow(rounded_model[1,:,:])
-plt.colorbar()
-
-# crevase
-plt.figure(12)
-plt.imshow(rounded_model[2,:,:])
-plt.colorbar()
+# # shale
+# plt.figure(10)
+# plt.imshow(rounded_model[0,:,:])
+# plt.colorbar()
+#
+# # channel
+# plt.figure(11)
+# plt.imshow(rounded_model[1,:,:])
+# plt.colorbar()
+#
+# # crevase
+# plt.figure(12)
+# plt.imshow(rounded_model[2,:,:])
+# plt.colorbar()
 
 
 tensor = rounded_model
 
 # Initialize the result tensor with zeros
-result_matrix = np.zeros_like(tensor[1,:,:])
+result_matrix = np.zeros_like(tensor[1,:,:],dtype=float)
 
 channel_for_channel_body = 1
+
+almost_zero = 2**-1
 
 # Calculate connected channel-body sizes
 for w in range(tensor.shape[2]):
@@ -59,17 +61,19 @@ for w in range(tensor.shape[2]):
             count += 1
         else:
             # Update the entire connected component with the thickness count
-            if count != 0:
+            if count > 0:
                 for k in range(h - count, h):
                     channel_body_sizes[k] = count
             count = 0
     # Ensure the last component is updated
-    if count != 0:
+    if count > 0:
         for k in range(h - count + 1, h + 1):
             channel_body_sizes[k] = count
 
     # Assign the calculated sizes to the result tensor
-    result_matrix[:, w] = channel_body_sizes
+    print(channel_body_sizes)
+    result_matrix[:, w] = np.log2(channel_body_sizes+almost_zero)
+    print(result_matrix[:, w])
 
 # Visualizing the original and result tensors for the first channel
 fig, axes = plt.subplots(1, 2, figsize=(10, 5))
