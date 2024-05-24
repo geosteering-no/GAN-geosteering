@@ -7,9 +7,10 @@ from matplotlib.colors import Normalize
 home = os.path.expanduser("~") # os independent home
 
 # local load of additional modules.
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/KERNEL'))
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/deep-borehole-inverse-problem/USER_SERGEY'))
-sys.path.append(os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering'))
+prefix = ''
+sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
+sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
+sys.path.append(prefix + '../gan-geosteering')
 
 from vector_to_image import GanEvaluator
 
@@ -100,7 +101,9 @@ def dynamic_programming1(weights, start_point):
     return dp, dp[end_row, -1], optimal_path
 
 
-gan_file_name = os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth')
+# gan_file_name = os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth')
+gan_file_name = '../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
+
 gan_vec_size = 60
 gan_evaluator = GanEvaluator(gan_file_name, gan_vec_size)
 

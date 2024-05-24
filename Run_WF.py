@@ -41,6 +41,7 @@ def main():
 
         state = np.load('posterior_state_estimate.npz')['m'] # import the posterior state estimate
         np.savez('prior.npz', **{'m': state}) # save the posterior state estimate as the new prior
+        # todo here we are saving the decision files - use them 
         np.savez(f'estimate_decission_{i}.npz', **{'m': state, 'pos': start_position}) # save the posterior state estimate and the current position of the well
 
         # find the next position along the optimal path given the state
