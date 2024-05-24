@@ -45,7 +45,7 @@ class GanLog:
         if input_dict is not None and "bit_pos" in input_dict:
             self.pos = [int(el) for el in input_dict['bit_pos']]
         else:
-            self.pos = [0]
+            self.pos = [(0,0)]
 
         #print(self.vec_size)
 
@@ -54,6 +54,9 @@ class GanLog:
         self.true_order = [self.input_dict['reporttype'], self.input_dict['reportpoint']]
         self.all_data_types = self.input_dict['datatype']
         self.l_prim = [int(i) for i in range(len(self.true_prim[1]))]
+
+    def update_bit_pos(self,new_bit_pos):
+        self.pos = new_bit_pos
 
     def generate_earth_model(self, input):
         if input is None:
@@ -150,8 +153,8 @@ class GanLog:
         input = []
         output = []
         for p in self.pos:
-            column_of_pixels = image[:, :, p]
-            mcwd_input = self.convert(column_of_pixels, 32)
+            column_of_pixels = image[:, :, p[1]]
+            mcwd_input = self.convert(column_of_pixels, p[0])
             # print("Column of pixels {}".format(column_of_pixels))
             # print("MCWD input {}".format(mcwd_input))
             input.append(mcwd_input)
