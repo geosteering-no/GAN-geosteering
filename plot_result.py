@@ -57,20 +57,20 @@ def main():
     origin_y = 32
     drilled_path = [np.array([origin_y, origin_x])]
     num_decission_points = 63
-    # for i in range(num_decission_points):
-    for i in range(1):
+    for i in range(num_decission_points):
+    # for i in range(1):
         # Load the decision points
         checkpoint_at_step = np.load(f'estimate_decission_{i}.npz')
         state_vectors = checkpoint_at_step['m']
         position_at_step = checkpoint_at_step['pos']
 
-        # todo remove test position
-        position_at_step = np.array([33, 4])
-        # position_at_step = np.array([6, 15])
-
-        # todo remove test trajectory
-        drilled_path.append(np.array([33, 2]))
-        drilled_path.append(position_at_step)
+        # # todo remove test position
+        # position_at_step = np.array([33, 4])
+        # # position_at_step = np.array([6, 15])
+        #
+        # # todo remove test trajectory
+        # drilled_path.append(np.array([33, 2]))
+        # drilled_path.append(position_at_step)
 
         # this is the posterior
         # todo should we switch back to probability of sand ???
@@ -128,7 +128,7 @@ def main():
                 else:
                     ax.plot(path_cols, tuple(row_list_truncated),
                             'k--', linewidth=0.25)
-            ax.set_title('Result with Optimal Path', fontsize=18)
+            # ax.set_title('Result with Optimal Path', fontsize=18)
             plt.tight_layout()
 
 
@@ -163,7 +163,7 @@ def main():
 
         drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 
-        plt.show()
+        # plt.show()
 
         # plot the mean GAN output for the current decision points
 
