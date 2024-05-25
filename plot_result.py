@@ -49,8 +49,13 @@ def main():
     if not os.path.exists(plot_path):
         os.makedirs(plot_path)
 
+    saved_legend = False
+
     # todo load from the config file! @KriFos1
-    drilled_path = [np.array([32,0])]
+    # Define the origin
+    origin_x = 0
+    origin_y = 32
+    drilled_path = [np.array([origin_y, origin_x])]
     num_decission_points = 63
     # for i in range(num_decission_points):
     for i in range(1):
@@ -68,6 +73,7 @@ def main():
         drilled_path.append(position_at_step)
 
         # this is the posterior
+        # todo should we switch back to probability of sand ???
         post_earth = np.array(
             [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el])) for el in
              range(ne)])  # range(state.shape[1])])
@@ -92,7 +98,7 @@ def main():
         # spl = make_interp_spline(x, y, k=3)  # k=3 for cubic spline
         # y_smooth = spl(x_smooth)
         ax.plot(path_cols, path_rows,
-                'k-', label='Drilled path')
+                'k-', linewidth=3., label='Drilled path')
         ax.plot(path_cols, path_rows,
                 'k*', label='Measurement locations')
 
@@ -113,14 +119,47 @@ def main():
             min_height = 0.0 - 0.5 + 0.01
             for j in range(ne):
                 path_rows, path_cols = zip(*(optimal_paths[j]))
-                row_list = [el + 0.2*np.random.randn() if c > len(drilled_path) else el for (c, el) in enumerate(path_rows)]
+                row_list = [el + 0.2*np.random.randn() for el in path_rows]
                 row_list_truncated = [el if el < max_height else max_height for el in row_list]
                 row_list_truncated = [el if el > min_height else min_height for el in row_list_truncated]
-                ax.plot(path_cols, tuple(row_list_truncated),
-                        'k--', linewidth=0.2, label='Further trajectory options')
+                if j == 0:
+                    ax.plot(path_cols, tuple(row_list_truncated),
+                            'k--', linewidth=0.25, label='Further trajectory options')
+                else:
+                    ax.plot(path_cols, tuple(row_list_truncated),
+                            'k--', linewidth=0.25)
             ax.set_title('Result with Optimal Path', fontsize=18)
             plt.tight_layout()
-            # plt.savefig(f'{plot_path}mean_earth_{i}.png')
+
+
+        # Define the step-sizes
+        step_x = 10
+        step_y = 0.5
+
+        # Calculate the tick positions and labels
+        x_ticks_positions = np.arange(0, 64, 10)
+        x_ticks_labels = (x_ticks_positions - origin_x) * step_x
+
+        # Define the specific y-axis labels
+        y_ticks_labels =     [-10, -5, 0, 5, 10]
+        y_ticks_labels_str = ['x090', 'x095', 'x100', 'x105', 'x110']
+        # Calculate the corresponding y tick positions
+        y_ticks_positions = [label / step_y + origin_y for label in y_ticks_labels]
+
+        # Set the ticks and labels on the plot
+        plt.xticks(x_ticks_positions, x_ticks_labels)
+        plt.yticks(y_ticks_positions, y_ticks_labels_str)
+
+        plt.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
+        plt.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
+
+        if not saved_legend:
+            # Adding the legend outside the plot
+            ax.legend(bbox_to_anchor=(1.25, 1), loc='upper left')
+            plt.savefig(f'{plot_path}legend.png', bbox_inches='tight')
+            plt.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
+            saved_legend = True
+
 
         drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 
