@@ -50,14 +50,19 @@ def main():
 
     path = [np.array([32,0])]
     num_decission_points = 63
-    for i in range(num_decission_points):
+    # for i in range(num_decission_points):
+    for i in range(1):
         # Load the decision points
-        decission_point = np.load(f'estimate_decission_{i}.npz')
+        checkpoint_at_step = np.load(f'estimate_decission_{i}.npz')
+        state_vectors = checkpoint_at_step['m']
+        position_at_step = checkpoint_at_step['pos']
+        # this is the posterior
         post_earth = np.array(
-            [create_weighted_image(evaluate_earth_model(gan_evaluator,decission_point['m'][:, el])) for el in
+            [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el])) for el in
              range(ne)])  # range(state.shape[1])])
 
-        optimal_path = [perform_dynamic_programming(post_earth[j,:,:], decission_point['pos'])[2] for j in range(ne)]
+        # next_position = pathfinder().run(, start_position)[0]
+        optimal_path = [perform_dynamic_programming(post_earth[j,:,:], position_at_step)[2] for j in range(ne)]
 
         fig, ax = plt.subplots(figsize=(10, 5))
         norm = Normalize(vmin=-0.1, vmax=1)
@@ -68,10 +73,11 @@ def main():
                     'k-', linewidth=0.5)
         ax.set_title('Result with Optimal Path', fontsize=18)
         plt.tight_layout()
-        plt.savefig(f'{plot_path}mean_earth_{i}.png')
+        # plt.savefig(f'{plot_path}mean_earth_{i}.png')
 
-        path.append(decission_point['pos'])
+        path.append(checkpoint_at_step['pos'])
 
+        plt.show()
 
         # plot the mean GAN output for the current decision points
 
