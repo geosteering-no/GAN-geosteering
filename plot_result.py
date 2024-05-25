@@ -73,8 +73,6 @@ def main():
 
         next_optimal, _garbage_path = pathfinder().run(state_vectors, position_at_step)
 
-        optimal_paths = [perform_dynamic_programming(post_earth[j,:,:], next_optimal)[2] for j in range(ne)]
-
         # creating the figure
         fig, ax = plt.subplots(figsize=(10, 5))
 
@@ -97,26 +95,30 @@ def main():
         ax.plot(path_cols, path_rows,
                 'k*', label='Measurement locations')
 
-        # visualizing the next decision
-        path_rows = [position_at_step[0], next_optimal[0]]
-        path_cols = [position_at_step[1], next_optimal[1]]
-        ax.plot(path_cols, path_rows,
-                'k:', label='Proposed direction')
+        if next_optimal[0] is not None:
 
-        # visualizing the optimal paths' remainders
-        earth_height = post_earth.shape[2]
-        max_height = earth_height - 0.5 - 0.01
-        min_height = 0.0 - 0.5 + 0.01
-        for j in range(ne):
-            path_rows, path_cols = zip(*(optimal_paths[j]))
-            row_list = [el + 0.2*np.random.randn() if c > len(drilled_path) else el for (c, el) in enumerate(path_rows)]
-            row_list_truncated = [el if el < max_height else max_height for el in row_list]
-            row_list_truncated = [el if el > min_height else min_height for el in row_list_truncated]
-            ax.plot(path_cols, tuple(row_list_truncated),
-                    'k--', linewidth=0.2, label='Further trajectory options')
-        ax.set_title('Result with Optimal Path', fontsize=18)
-        plt.tight_layout()
-        # plt.savefig(f'{plot_path}mean_earth_{i}.png')
+            # visualizing the next decision
+            path_rows = [position_at_step[0], next_optimal[0]]
+            path_cols = [position_at_step[1], next_optimal[1]]
+            ax.plot(path_cols, path_rows,
+                    'k:', label='Proposed direction')
+
+            optimal_paths = [perform_dynamic_programming(post_earth[j, :, :], next_optimal)[2] for j in range(ne)]
+
+            # visualizing the optimal paths' remainders
+            earth_height = post_earth.shape[2]
+            max_height = earth_height - 0.5 - 0.01
+            min_height = 0.0 - 0.5 + 0.01
+            for j in range(ne):
+                path_rows, path_cols = zip(*(optimal_paths[j]))
+                row_list = [el + 0.2*np.random.randn() if c > len(drilled_path) else el for (c, el) in enumerate(path_rows)]
+                row_list_truncated = [el if el < max_height else max_height for el in row_list]
+                row_list_truncated = [el if el > min_height else min_height for el in row_list_truncated]
+                ax.plot(path_cols, tuple(row_list_truncated),
+                        'k--', linewidth=0.2, label='Further trajectory options')
+            ax.set_title('Result with Optimal Path', fontsize=18)
+            plt.tight_layout()
+            # plt.savefig(f'{plot_path}mean_earth_{i}.png')
 
         drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 

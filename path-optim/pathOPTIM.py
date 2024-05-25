@@ -26,7 +26,7 @@ class pathfinder():
     #         results = list(tqdm(pool.imap(self.worker, zip(states, indices)), total=len(states), disable=self.disable_tqdm))
     #     return results
 
-    def trace_path(self,dp_matrix, start_row, start_col):
+    def trace_path(self, dp_matrix, start_row, start_col):
         path = [start_row]  # Start the path with the best index
         current_row = start_row
         # Trace the path forward from the start column to the end of the matrix
@@ -38,35 +38,47 @@ class pathfinder():
 
         return path
 
-    def run(self,state,start_point):
+    def run(self, state, start_point, discount_for_remainder=1.0, dy_vector=None):
+        if dy_vector is None:
+            dy_vector = [0, -1, 1]
+
         optimal_paths = []
         max_path_values = []
         dp_matrices = []
+        weighted_images = []
 
         ne = state.shape[1]
         # change it to an input parameter
         # row first, column second
         #start_point = (32, 0)  # Middle of the image
-        _, cur_column = start_point
+        cur_row, cur_column = start_point
 
         list_member_index = list(range(ne))
         for i in range(ne):
 
-            dp_matrix_i, max_path_value, optimal_path = process_prior_and_plot_results(state[:,i], start_point)
+            # todo send the di vector there
+            dp_matrix_i, max_path_value, weighted_image_i, optimal_path = process_prior_and_plot_results(state[:,i], start_point, di_vector=dy_vector)
 
             optimal_paths.append(optimal_path)
             max_path_values.append(max_path_value)
             dp_matrices.append(dp_matrix_i)
+            weighted_images.append(weighted_image_i)
 
         next_column = cur_column + 1
+        best_next_index = None
         if next_column < dp_matrix_i.shape[1]:
-            sum_for_column = np.zeros(dp_matrix_i.shape[0])
-            # iterater over rows
-            for y in range(dp_matrix_i.shape[0]):
-                # sum opver ensemble members
+            # initialize all as unreachable
+            sum_for_column = np.ones(dp_matrix_i.shape[0])*-1
+            # iterate over rows
+            # for y in range(dp_matrix_i.shape[0]):
+            for dy in dy_vector:
+                y = cur_row + dy
+                # sum over ensemble members
                 for i in range(ne):
-                    sum_for_column[y] += dp_matrices[i][y][next_column]
-            best_next_index = np.argmax(sum_for_column)
+                    # we add the expected immidiate reward and the expected long-term gain times the discount
+                    sum_for_column[y] += weighted_images[i][y][next_column] + dp_matrices[i][y][next_column] * discount_for_remainder
+            if np.max(sum_for_column) > 0:
+                best_next_index = np.argmax(sum_for_column)
         #else:
         #    print("We are done")
 

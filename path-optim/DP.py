@@ -15,90 +15,130 @@ sys.path.append(prefix + '../gan-geosteering')
 from vector_to_image import GanEvaluator
 
 
-def dynamic_programming(weights, start_point):
+# def dynamic_programming_old(weights, start_point):
+#     n, m = weights.shape
+#     dp = np.full((n, m), -np.inf)  # Initialize with -inf for unvisited cells
+#     path = np.zeros((n, m, 2), dtype=int)  # Store (prev_row, prev_col) for backtracking
+#
+#     # Initialize the start point
+#     start_row, start_col = start_point
+#     dp[start_row, start_col] = weights[start_row, start_col]
+#
+#     # Fill the DP table, considering horizontal and limited vertical moves from the start point
+#     for j in range(start_col + 1, m):
+#         for i in range(n):
+#             # From directly left (i, j-1)
+#             if j > start_col and dp[i, j - 1] + weights[i, j] > dp[i, j]:
+#                 dp[i, j] = dp[i, j - 1] + weights[i, j]
+#                 path[i, j] = (i, j - 1)
+#
+#             # From above (i-1, j) if not in the first row
+#             if i > 0 and dp[i - 1, j] + weights[i, j] > dp[i, j]:
+#                 dp[i, j] = dp[i - 1, j] + weights[i, j]
+#                 path[i, j] = (i - 1, j)
+#
+#             # From below (i+1, j) if not in the last row
+#             if i < n - 1 and dp[i + 1, j] + weights[i, j] > dp[i, j]:
+#                 dp[i, j] = dp[i + 1, j] + weights[i, j]
+#                 path[i, j] = (i + 1, j)
+#
+#     # Identify the optimal endpoint in the last column
+#     end_row = np.argmax(dp[:, -1])
+#     max_value = dp[end_row, -1]
+#
+#     # Backtrack to find the optimal path starting from the best endpoint
+#     optimal_path = []
+#     current = (end_row, m - 1)
+#     while current[1] > start_col:  # Continue until reaching the starting column
+#         optimal_path.append(current)
+#         current = tuple(path[current])
+#
+#     optimal_path.append(start_point)  # Add the start of the path
+#     optimal_path.reverse()  # Reverse the path to start from the optimal starting point
+#
+#     return dp, max_value, optimal_path
+
+
+
+def dynamic_programming1(weights, start_point, discount_factor=1.0, di_vector=None):
+    """
+    :param weights:
+    :param start_point:
+    :param discount_factor:
+    :param di_vector: defines possible vertical shifts in the trajectory
+    :return:
+    """
+    # todo implement the discount factor
+    # would the discout vector work if we go forward?
+
+    if di_vector is None:
+        di_vector = [0, -1, 1]
     n, m = weights.shape
-    dp = np.full((n, m), -np.inf)  # Initialize with -inf for unvisited cells
-    path = np.zeros((n, m, 2), dtype=int)  # Store (prev_row, prev_col) for backtracking
+    path = np.ones((n, m, 2), dtype=int)*-1
+    # path stores (next_row, next_col) or -1, -1 for backtracking
 
-    # Initialize the start point
+    # initialize the DP matrix with zeros
+    # the cells meaning will be the max possible reward starting from that cell
+    # we will not inclclude the cell's weight itself
+    # since it is initialized with zeroes we never use negative values
+    dp = np.full_like(weights, 0.0, dtype=float)  # Initialize with -inf for unvisited cells
+
     start_row, start_col = start_point
-    dp[start_row, start_col] = weights[start_row, start_col]
 
-    # Fill the DP table, considering horizontal and limited vertical moves from the start point
-    for j in range(start_col + 1, m):
+    # Fill the DP table from the last column back to the current position
+    for j in range(m - 2, start_col - 1, -1):
         for i in range(n):
-            # From directly left (i, j-1)
-            if j > start_col and dp[i, j - 1] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i, j - 1] + weights[i, j]
-                path[i, j] = (i, j - 1)
+            for di in di_vector:
+                next_i = i+di
+                # check if the next cell is in range
+                if 0 <= next_i < n:
+                    proposed_value = dp[next_i, j + 1] + weights[next_i, j + 1]
+                    # todo check for discount here
+                    # todo add drilling cost here
+                    if proposed_value > dp[i, j]:
+                        dp[i, j] = proposed_value
+                        path[i, j] = (next_i, j+1)
 
-            # From above (i-1, j) if not in the first row
-            if i > 0 and dp[i - 1, j] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i - 1, j] + weights[i, j]
-                path[i, j] = (i - 1, j)
-
-            # From below (i+1, j) if not in the last row
-            if i < n - 1 and dp[i + 1, j] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i + 1, j] + weights[i, j]
-                path[i, j] = (i + 1, j)
-
-    # Identify the optimal endpoint in the last column
-    end_row = np.argmax(dp[:, -1])
-    max_value = dp[end_row, -1]
-
-    # Backtrack to find the optimal path starting from the best endpoint
-    optimal_path = []
-    current = (end_row, m - 1)
-    while current[1] > start_col:  # Continue until reaching the starting column
-        optimal_path.append(current)
-        current = tuple(path[current])
-
-    optimal_path.append(start_point)  # Add the start of the path
-    optimal_path.reverse()  # Reverse the path to start from the optimal starting point
-
-    return dp, max_value, optimal_path
-
-
-def dynamic_programming1(weights, start_point):
-    n, m = weights.shape
-    dp = np.full_like(weights, -np.inf, dtype=float)  # Initialize with -inf for unvisited cells
-    path = np.zeros((n, m, 2), dtype=int)  # Store (prev_row, prev_col) for backtracking
-
-    # Initialize the start point as provided
-    start_row, start_col = start_point
-    dp[start_row, start_col] = weights[start_row, start_col]
-
-    # Fill the DP table, considering horizontal and diagonal moves from the start point
-    for j in range(start_col + 1, m):
-        for i in range(n):
-            # From directly left (i, j-1)
-            if j > 0 and dp[i, j - 1] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i, j - 1] + weights[i, j]
-                path[i, j] = (i, j - 1)
-
-            # Diagonal upper-left (i-1, j-1)
-            if i > 0 and j > 0 and dp[i - 1, j - 1] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i - 1, j - 1] + weights[i, j]
-                path[i, j] = (i - 1, j - 1)
-
-            # Diagonal lower-left (i+1, j-1)
-            if i < n - 1 and j > 0 and dp[i + 1, j - 1] + weights[i, j] > dp[i, j]:
-                dp[i, j] = dp[i + 1, j - 1] + weights[i, j]
-                path[i, j] = (i + 1, j - 1)
-
+    # # Initialize the start point as provided
+    # dp[start_row, start_col] = weights[start_row, start_col]
+    # # Fill the DP table, considering horizontal and diagonal moves from the start point
+    # for j in range(start_col + 1, m):
+    #     for i in range(n):
+    #         # From directly left (i, j-1)
+    #         if j > 0 and dp[i, j - 1] + weights[i, j] > dp[i, j]:
+    #             dp[i, j] = dp[i, j - 1] + weights[i, j]
+    #             path[i, j] = (i, j - 1)
+    #
+    #         # Diagonal upper-left (i-1, j-1)
+    #         if i > 0 and j > 0 and dp[i - 1, j - 1] + weights[i, j] > dp[i, j]:
+    #             dp[i, j] = dp[i - 1, j - 1] + weights[i, j]
+    #             path[i, j] = (i - 1, j - 1)
+    #
+    #         # Diagonal lower-left (i+1, j-1)
+    #         if i < n - 1 and j > 0 and dp[i + 1, j - 1] + weights[i, j] > dp[i, j]:
+    #             dp[i, j] = dp[i + 1, j - 1] + weights[i, j]
+    #             path[i, j] = (i + 1, j - 1)
     # Trace back the path from the best endpoint
-    end_row = np.argmax(dp[:, -1])
-    current = (end_row, m - 1)
-    optimal_path = []
+    # end_row = np.argmax(dp[:, -1])
+    # current = (end_row, m - 1)
 
-    while current[1] > start_col:  # Backtrack from the end column to the start column
+    optimal_path = []
+    optimal_path.append(start_point)
+    current = tuple(path[start_row, start_col, :])
+
+    while current[1] > 0:
         optimal_path.append(current)
         current = tuple(path[current])
 
-    optimal_path.append(start_point)  # Include the start point
-    optimal_path.reverse()  # Reverse the path to start from the optimal starting point
+    # while current[1] > start_col:  # Backtrack from the end column to the start column
+    #     optimal_path.append(current)
+    #     current = tuple(path[current])
 
-    return dp, dp[end_row, -1], optimal_path
+
+    # optimal_path.reverse()  # Reverse the path to start from the optimal starting point
+
+    # return dp, dp[end_row, -1], optimal_path
+    return dp, dp[start_row, start_col], optimal_path
 
 
 # gan_file_name = os.path.join(home,'OneDrive/DISTINGUISH/ECMOR_study/gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth')
@@ -119,12 +159,17 @@ def evaluate_earth_model(gan_evaluator, single_realization):
 
 
 def create_weighted_image(normalized_rgb):
-    weights = np.array([-0.1, 1, 0.5])
+    # note that negative weight of shale can result in no drilling!
+    # todo play with weights
+    weights = np.array([-1.0, 1.0, 0.5])
     return np.dot(normalized_rgb, weights)
 
 
-def perform_dynamic_programming(weighted_image, start_point):
-    dp = dynamic_programming1(weighted_image, start_point)  # Assume dynamic_programming1 is defined as before
+def perform_dynamic_programming(weighted_image, start_point, discount_factor=1.0, di_vector=None):
+    if di_vector is None:
+        di_vector = [0, -1, 1]
+    # todo implement the discount factor
+    dp = dynamic_programming1(weighted_image, start_point, di_vector=di_vector)  # Assume dynamic_programming1 is defined as before
     return dp
 
 
@@ -139,16 +184,28 @@ def plot_results(weighted_image, optimal_path):
     plt.show()
 
 
-def process_prior_and_plot_results(single_realization, start_point, plot_path=False):
+def process_prior_and_plot_results(single_realization, start_point, plot_path=False, discount_factor=1.0, di_vector=None):
+    """
+
+    :param single_realization:
+    :param start_point:
+    :param plot_path:
+    :return:
+    """
+    if di_vector is None:
+        di_vector = [0, -1, 1]
+    # todo implement the discount factor
     normalized_rgb = evaluate_earth_model(gan_evaluator, single_realization)
     weighted_image = create_weighted_image(normalized_rgb)
 
-    dp_matrix, max_path_value, optimal_path = perform_dynamic_programming(weighted_image, start_point)
+    dp_matrix, max_path_value, optimal_path = perform_dynamic_programming(weighted_image, start_point, di_vector=di_vector)
 
     if plot_path:
         plot_results(weighted_image, optimal_path)
 
-    return dp_matrix, max_path_value, optimal_path
+
+    # TODO note the weighted image in the output
+    return dp_matrix, max_path_value, weighted_image, optimal_path
 
 
 def process_matrix(single_realization, optimal_path, best_point, best_paths):
