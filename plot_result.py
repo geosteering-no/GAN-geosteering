@@ -3,6 +3,7 @@ from pathOPTIM import pathfinder
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 import matplotlib
+from scipy.interpolate import make_interp_spline
 
 
 # plt.ion()
@@ -58,8 +59,11 @@ def main():
         state_vectors = checkpoint_at_step['m']
         position_at_step = checkpoint_at_step['pos']
 
-        # # todo remove test position
+        # todo remove test position
         position_at_step = np.array([33, 4])
+
+        # todo remove test trajectory
+        drilled_path.append(np.array([33, 2]))
         drilled_path.append(position_at_step)
 
         # this is the posterior
@@ -79,17 +83,37 @@ def main():
         im = ax.imshow(post_earth.mean(axis=0), cmap='tab20b', aspect='auto', norm=norm)
         cbar = plt.colorbar(im, ax=ax)
 
+        # visualizing the drilled path
+        path_rows, path_cols = zip(*(drilled_path))
+        # todo consider creating smooth path. Does not work easily when few points.
+        # # Creating a smooth curve
+        # x = np.array(path_cols)
+        # y = np.array(path_rows)
+        # x_smooth = np.linspace(x.min(), x.max(), 300)
+        # spl = make_interp_spline(x, y, k=3)  # k=3 for cubic spline
+        # y_smooth = spl(x_smooth)
+        ax.plot(path_cols, path_rows,
+                'k-', label='Drilled path')
+        ax.plot(path_cols, path_rows,
+                'k*', label='Measurement locations')
+
+        # visualizing the next decision
+        path_rows = [position_at_step[0], next_optimal[0]]
+        path_cols = [position_at_step[1], next_optimal[1]]
+        ax.plot(path_cols, path_rows,
+                'k:', label='Proposed direction')
+
         # visualizing the optimal paths' remainders
         earth_height = post_earth.shape[2]
         max_height = earth_height - 0.5 - 0.01
         min_height = 0.0 - 0.5 + 0.01
         for j in range(ne):
-            path_rows, path_cols = zip(*(drilled_path+optimal_paths[j]))
+            path_rows, path_cols = zip(*(optimal_paths[j]))
             row_list = [el + 0.2*np.random.randn() if c > len(drilled_path) else el for (c, el) in enumerate(path_rows)]
             row_list_truncated = [el if el < max_height else max_height for el in row_list]
             row_list_truncated = [el if el > min_height else min_height for el in row_list_truncated]
             ax.plot(path_cols, tuple(row_list_truncated),
-                    'k-', linewidth=0.2)
+                    'k--', linewidth=0.2, label='Further trajectory options')
         ax.set_title('Result with Optimal Path', fontsize=18)
         plt.tight_layout()
         # plt.savefig(f'{plot_path}mean_earth_{i}.png')
