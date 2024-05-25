@@ -22,10 +22,10 @@ import mcwd_converter
 from vector_to_image import GanEvaluator
 from run_model_clean import DnnEvaluatorMcwd
 from resitivity import get_resistivity_default
-import warnings
-# Ignore FutureWarning and UserWarning
-warnings.filterwarnings(action='ignore', category=FutureWarning)
-warnings.filterwarnings(action='ignore', category=UserWarning)
+# import warnings
+# # Ignore FutureWarning and UserWarning
+# warnings.filterwarnings(action='ignore', category=FutureWarning)
+# warnings.filterwarnings(action='ignore', category=UserWarning)
 
 class GanLog:
     def __init__(self,input_dict=None):
