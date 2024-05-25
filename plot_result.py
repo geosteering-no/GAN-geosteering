@@ -60,7 +60,8 @@ def main():
         position_at_step = checkpoint_at_step['pos']
 
         # todo remove test position
-        position_at_step = np.array([33, 4])
+        # position_at_step = np.array([33, 4])
+        position_at_step = np.array([6, 15])
 
         # todo remove test trajectory
         drilled_path.append(np.array([33, 2]))

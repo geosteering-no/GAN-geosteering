@@ -38,9 +38,12 @@ class pathfinder():
 
         return path
 
-    def run(self, state, start_point, discount_for_remainder=1.0, dy_vector=None):
+    def run(self, state, start_point, discount_for_remainder=1.0, dy_vector=None, cost_vector=None, cost_mult=0.0):
         if dy_vector is None:
-            dy_vector = [0, -1, 1]
+            dy_vector = np.array([0, -1, 1])
+        if cost_vector is None:
+            # 10 in dx 0.5 in dy
+            cost_vector = np.array(np.sqrt(np.power(10.0, 2) + np.power(dy_vector*0.5, 2)))*cost_mult
 
         optimal_paths = []
         max_path_values = []
@@ -57,7 +60,8 @@ class pathfinder():
         for i in range(ne):
 
             # todo send the di vector there
-            dp_matrix_i, max_path_value, weighted_image_i, optimal_path = process_prior_and_plot_results(state[:,i], start_point, di_vector=dy_vector)
+            dp_matrix_i, max_path_value, weighted_image_i, optimal_path = (
+                process_prior_and_plot_results(state[:,i], start_point, di_vector=dy_vector, cost_vector=cost_vector))
 
             optimal_paths.append(optimal_path)
             max_path_values.append(max_path_value)
@@ -71,12 +75,14 @@ class pathfinder():
             sum_for_column = np.ones(dp_matrix_i.shape[0])*-1
             # iterate over rows
             # for y in range(dp_matrix_i.shape[0]):
-            for dy in dy_vector:
+            for k, dy in enumerate(dy_vector):
                 y = cur_row + dy
+                drilling_direction_cost = cost_vector[k]
                 # sum over ensemble members
                 for i in range(ne):
                     # we add the expected immidiate reward and the expected long-term gain times the discount
-                    sum_for_column[y] += weighted_images[i][y][next_column] + dp_matrices[i][y][next_column] * discount_for_remainder
+                    sum_for_column[y] += (weighted_images[i][y][next_column] - drilling_direction_cost
+                                          + dp_matrices[i][y][next_column] * discount_for_remainder)
             if np.max(sum_for_column) > 0:
                 best_next_index = np.argmax(sum_for_column)
         #else:

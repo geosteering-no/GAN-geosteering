@@ -60,7 +60,9 @@ from vector_to_image import GanEvaluator
 
 
 
-def dynamic_programming1(weights, start_point, discount_factor=1.0, di_vector=None):
+def dynamic_programming1(weights, start_point, discount_factor=1.0,
+                         di_vector=None,
+                         cost_vector=None):
     """
     :param weights:
     :param start_point:
@@ -73,6 +75,8 @@ def dynamic_programming1(weights, start_point, discount_factor=1.0, di_vector=No
 
     if di_vector is None:
         di_vector = [0, -1, 1]
+    if cost_vector is None:
+        cost_vector = [1., 1., 1.]
     n, m = weights.shape
     path = np.ones((n, m, 2), dtype=int)*-1
     # path stores (next_row, next_col) or -1, -1 for backtracking
@@ -88,11 +92,12 @@ def dynamic_programming1(weights, start_point, discount_factor=1.0, di_vector=No
     # Fill the DP table from the last column back to the current position
     for j in range(m - 2, start_col - 1, -1):
         for i in range(n):
-            for di in di_vector:
+            for k, di in enumerate(di_vector):
                 next_i = i+di
+                drilling_direction_cost = cost_vector[k]
                 # check if the next cell is in range
                 if 0 <= next_i < n:
-                    proposed_value = dp[next_i, j + 1] + weights[next_i, j + 1]
+                    proposed_value = dp[next_i, j + 1] + weights[next_i, j + 1] - drilling_direction_cost
                     # todo check for discount here
                     # todo add drilling cost here
                     if proposed_value > dp[i, j]:
@@ -161,15 +166,20 @@ def evaluate_earth_model(gan_evaluator, single_realization):
 def create_weighted_image(normalized_rgb):
     # note that negative weight of shale can result in no drilling!
     # todo play with weights
-    weights = np.array([-1.0, 1.0, 0.5])
+    weights = np.array([0.0, 1.0, 0.5])
+    # we are changing negative cost with drilling cost
     return np.dot(normalized_rgb, weights)
 
 
-def perform_dynamic_programming(weighted_image, start_point, discount_factor=1.0, di_vector=None):
+def perform_dynamic_programming(weighted_image, start_point, discount_factor=1.0,
+                                di_vector=None,
+                                cost_vector=None):
     if di_vector is None:
         di_vector = [0, -1, 1]
     # todo implement the discount factor
-    dp = dynamic_programming1(weighted_image, start_point, di_vector=di_vector)  # Assume dynamic_programming1 is defined as before
+    dp = dynamic_programming1(weighted_image, start_point,
+                              di_vector=di_vector,
+                              cost_vector=cost_vector)  # Assume dynamic_programming1 is defined as before
     return dp
 
 
@@ -184,7 +194,9 @@ def plot_results(weighted_image, optimal_path):
     plt.show()
 
 
-def process_prior_and_plot_results(single_realization, start_point, plot_path=False, discount_factor=1.0, di_vector=None):
+def process_prior_and_plot_results(single_realization, start_point, plot_path=False, discount_factor=1.0,
+                                   di_vector=None,
+                                   cost_vector=None):
     """
 
     :param single_realization:
@@ -198,7 +210,9 @@ def process_prior_and_plot_results(single_realization, start_point, plot_path=Fa
     normalized_rgb = evaluate_earth_model(gan_evaluator, single_realization)
     weighted_image = create_weighted_image(normalized_rgb)
 
-    dp_matrix, max_path_value, optimal_path = perform_dynamic_programming(weighted_image, start_point, di_vector=di_vector)
+    dp_matrix, max_path_value, optimal_path = perform_dynamic_programming(weighted_image, start_point,
+                                                                          di_vector=di_vector,
+                                                                          cost_vector=cost_vector)
 
     if plot_path:
         plot_results(weighted_image, optimal_path)
