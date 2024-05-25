@@ -60,8 +60,8 @@ def main():
         position_at_step = checkpoint_at_step['pos']
 
         # todo remove test position
-        # position_at_step = np.array([33, 4])
-        position_at_step = np.array([6, 15])
+        position_at_step = np.array([33, 4])
+        # position_at_step = np.array([6, 15])
 
         # todo remove test trajectory
         drilled_path.append(np.array([33, 2]))
@@ -104,7 +104,8 @@ def main():
             ax.plot(path_cols, path_rows,
                     'k:', label='Proposed direction')
 
-            optimal_paths = [perform_dynamic_programming(post_earth[j, :, :], next_optimal)[2] for j in range(ne)]
+            optimal_paths = [perform_dynamic_programming(post_earth[j, :, :], next_optimal,
+                                                         cost_vector=pathfinder().get_cost_vector())[2] for j in range(ne)]
 
             # visualizing the optimal paths' remainders
             earth_height = post_earth.shape[2]

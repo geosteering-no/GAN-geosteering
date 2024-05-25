@@ -38,12 +38,18 @@ class pathfinder():
 
         return path
 
-    def run(self, state, start_point, discount_for_remainder=1.0, dy_vector=None, cost_vector=None, cost_mult=0.0):
+    def get_cost_vector(self, dy_vector=None, cost_mult=0.07):
+        if dy_vector is None:
+            dy_vector = np.array([0, -1, 1])
+        # 10 in dx 0.5 in dy
+        cost_vector = np.array(np.sqrt(np.power(10.0, 2) + np.power(dy_vector * 0.5, 2))) * cost_mult
+        return cost_vector
+
+    def run(self, state, start_point, discount_for_remainder=1.0, dy_vector=None, cost_vector=None, cost_mult=0.07):
         if dy_vector is None:
             dy_vector = np.array([0, -1, 1])
         if cost_vector is None:
-            # 10 in dx 0.5 in dy
-            cost_vector = np.array(np.sqrt(np.power(10.0, 2) + np.power(dy_vector*0.5, 2)))*cost_mult
+            cost_vector = self.get_cost_vector(dy_vector, cost_mult)
 
         optimal_paths = []
         max_path_values = []
@@ -81,7 +87,8 @@ class pathfinder():
                 # sum over ensemble members
                 for i in range(ne):
                     # we add the expected immidiate reward and the expected long-term gain times the discount
-                    sum_for_column[y] += (weighted_images[i][y][next_column] - drilling_direction_cost
+                    sum_for_column[y] += (weighted_images[i][y][next_column]
+                                          # - drilling_direction_cost
                                           + dp_matrices[i][y][next_column] * discount_for_remainder)
             if np.max(sum_for_column) > 0:
                 best_next_index = np.argmax(sum_for_column)
