@@ -58,7 +58,7 @@ def main():
     drilled_path = [np.array([origin_y, origin_x])]
     num_decission_points = 63
     for i in range(num_decission_points):
-    # for i in range(1):
+        # for i in range(1):
         # Load the decision points
         checkpoint_at_step = np.load(f'estimate_decission_{i}.npz')
         state_vectors = checkpoint_at_step['m']
@@ -87,6 +87,18 @@ def main():
         norm = Normalize(vmin=0.0, vmax=1)
         im = ax.imshow(post_earth.mean(axis=0), cmap='tab20b', aspect='auto', norm=norm)
         cbar = plt.colorbar(im, ax=ax)
+
+        # visualizing the outline of the truth
+        x = np.array(range(64))
+        y = np.array(range(64))
+        X, Y = np.meshgrid(x, y)
+        single_model = gan_evaluator.eval(input_vec=state_vectors[:, 0])
+        Z = single_model[0, :, :]
+        contour_style = 'dashed'
+        contour_color = 'white'
+        contour = plt.contour(X, Y, Z, levels=0, colors=contour_color,
+                                linestyles=contour_style)
+        # contour.collections[0].set_label('Outline of sand+crevasse in the true model')
 
         # visualizing the drilled path
         path_rows, path_cols = zip(*(drilled_path))
@@ -155,7 +167,12 @@ def main():
 
         if not saved_legend:
             # Adding the legend outside the plot
-            ax.legend(bbox_to_anchor=(1.25, 1), loc='upper left')
+            # manually adding a line to the legend
+            plt.plot([0], [0], linestyle=contour_style, color=contour_color,
+                     label='Outline of sand+crevasse in the true model')
+
+            legend = ax.legend(bbox_to_anchor=(1.25, 1), loc='upper left')
+            legend.get_frame().set_facecolor('lightgray')  # Set the background color to light gray
             plt.savefig(f'{plot_path}legend.png', bbox_inches='tight')
             plt.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
             saved_legend = True
