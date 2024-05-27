@@ -92,7 +92,8 @@ def main():
         x = np.array(range(64))
         y = np.array(range(64))
         X, Y = np.meshgrid(x, y)
-        single_model = gan_evaluator.eval(input_vec=state_vectors[:, 0])
+        synth_truth = np.load(os.path.join(prefix,'../gan-geosteering/saves/chosen_realization_C1.npz'))['arr_0']
+        single_model = gan_evaluator.eval(input_vec=synth_truth)
         Z = single_model[0, :, :]
         contour_style = 'dashed'
         contour_color = 'white'
