@@ -246,7 +246,7 @@ def main():
             fig.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
             saved_legend = True
 
-        fig.close()
+        plt.close('all')
         # drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 
         # plt.show()
