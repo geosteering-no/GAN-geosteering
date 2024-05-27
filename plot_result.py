@@ -63,6 +63,15 @@ def main():
     true_earth_model_facies = gan_evaluator.eval(input_vec=synth_truth)
     true_resistivity_image = convert_facies_to_resistivity(true_earth_model_facies)
 
+    # plot the resistivity:
+    # Create the plot
+    fig_res, ax_res = plt.subplots(figsize=(12, 5))
+    # Use the 'viridis' colormap
+    res_im = ax_res.imshow(true_resistivity_image, aspect='auto', cmap='summer', vmin=1, vmax=200)
+    cbar = plt.colorbar(res_im, ax=ax_res)
+    overlay_step = 0
+    # plt.show()
+
     # todo load from the config file! @KriFos1
     # Define the origin
     labelled_index = 0
@@ -99,7 +108,7 @@ def main():
         # visualizing the posterior
         norm = Normalize(vmin=0.0, vmax=1)
         im = ax.imshow(post_earth.mean(axis=0), cmap='tab20b', aspect='auto', norm=norm)
-        cbar = plt.colorbar(im, ax=ax)
+
 
         # visualizing the outline of the truth
         x = np.array(range(64))
@@ -125,6 +134,37 @@ def main():
                 'k-', linewidth=3., label='Drilled path')
         ax.plot(path_cols, path_rows,
                 'k*', label='Measurement locations')
+
+        if i == overlay_step:
+            ax_res.plot(path_cols, path_rows,
+                    'k-', linewidth=3., label='Drilled path')
+            ax_res.plot(path_cols, path_rows,
+                    'k*', label='Measurement locations')
+            # saving the true resistivity image with overlay
+            # Define the step-sizes
+            step_x = 10
+            step_y = 0.5
+
+            # Calculate the tick positions and labels
+            x_ticks_positions = np.arange(0, 64, 10)
+            x_ticks_labels = (x_ticks_positions - origin_x) * step_x
+
+            # Define the specific y-axis labels
+            y_ticks_labels = [-10, -5, 0, 5, 10]
+            y_ticks_labels_str = ['x090', 'x095', 'x100', 'x105', 'x110']
+            # Calculate the corresponding y tick positions
+            y_ticks_positions = [label / step_y + origin_y for label in y_ticks_labels]
+
+            # Set x-ticks and labels
+            ax_res.set_xticks(x_ticks_positions)
+            ax_res.set_xticklabels(x_ticks_labels)
+
+            # Set y-ticks and labels
+            ax_res.set_yticks(y_ticks_positions)
+            ax_res.set_yticklabels(y_ticks_labels_str)
+
+            fig_res.savefig(f'{plot_path}true_resistivity_{i}.png', bbox_inches='tight', dpi=600)
+            fig_res.savefig(f'{plot_path}true_resistivity_{i}.pdf', bbox_inches='tight')
 
         if next_optimal[0] is not None:
 
@@ -173,25 +213,29 @@ def main():
         # Calculate the corresponding y tick positions
         y_ticks_positions = [label / step_y + origin_y for label in y_ticks_labels]
 
-        # Set the ticks and labels on the plot
-        plt.xticks(x_ticks_positions, x_ticks_labels)
-        plt.yticks(y_ticks_positions, y_ticks_labels_str)
+        # Set x-ticks and labels
+        ax.set_xticks(x_ticks_positions)
+        ax.set_xticklabels(x_ticks_labels)
+        # Set y-ticks and labels
+        ax.set_yticks(y_ticks_positions)
+        ax.set_yticklabels(y_ticks_labels_str)
 
-        plt.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
-        plt.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
+        fig.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
+        fig.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
 
         print(f'Saved step {i}')
 
         if not saved_legend:
             # Adding the legend outside the plot
             # manually adding a line to the legend
-            plt.plot([0], [0], linestyle=contour_style, color=contour_color,
+            cbar = plt.colorbar(im, ax=ax, location='bottom')
+            ax.plot([0], [0], linestyle=contour_style, color=contour_color,
                      label='Outline of sand+crevasse in the true model')
 
             legend = ax.legend(bbox_to_anchor=(1.25, 1), loc='upper left')
             legend.get_frame().set_facecolor('lightgray')  # Set the background color to light gray
-            plt.savefig(f'{plot_path}legend.png', bbox_inches='tight')
-            plt.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
+            fig.savefig(f'{plot_path}legend.png', bbox_inches='tight')
+            fig.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
             saved_legend = True
 
 
