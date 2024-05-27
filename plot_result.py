@@ -53,6 +53,7 @@ def main():
 
     # todo load from the config file! @KriFos1
     # Define the origin
+    labelled_index = 0
     origin_x = 0
     origin_y = 32
     drilled_path = [np.array([origin_y, origin_x])]
@@ -132,13 +133,16 @@ def main():
             min_height = 0.0 - 0.5 + 0.01
             for j in range(ne):
                 path_rows, path_cols = zip(*(optimal_paths[j]))
-                row_list = [el + 0.2*np.random.randn() for el in path_rows]
+                noise_mult = 0.2
+                # noise_mult = 0
+                row_list = [el + noise_mult*np.random.randn() for el in path_rows]
                 row_list_truncated = [el if el < max_height else max_height for el in row_list]
                 row_list_truncated = [el if el > min_height else min_height for el in row_list_truncated]
-                if j == 0:
+                if j == labelled_index:
                     ax.plot(path_cols, tuple(row_list_truncated),
                             'k--', linewidth=0.25, label='Further trajectory options')
                 else:
+                    # continue
                     ax.plot(path_cols, tuple(row_list_truncated),
                             'k--', linewidth=0.25)
             # ax.set_title('Result with Optimal Path', fontsize=18)
@@ -165,6 +169,8 @@ def main():
 
         plt.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
         plt.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
+
+        print(f'Saved step {i}')
 
         if not saved_legend:
             # Adding the legend outside the plot
