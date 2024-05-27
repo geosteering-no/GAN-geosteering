@@ -14,7 +14,8 @@ if __name__ == '__main__':
     sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
     sys.path.append(prefix + '../gan-geosteering')
     # TODO check paths here
-
+else:
+    prefix = ''
 
 
 
@@ -27,8 +28,9 @@ from resitivity import get_resistivity_default
 # warnings.filterwarnings(action='ignore', category=FutureWarning)
 # warnings.filterwarnings(action='ignore', category=UserWarning)
 
+
 class GanLog:
-    def __init__(self,input_dict=None):
+    def __init__(self, input_dict=None):
         self.input_dict = input_dict
         self.get_resistivity_default = get_resistivity_default
         self.convert = mcwd_converter.convert_to_mcwd_input

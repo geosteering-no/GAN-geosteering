@@ -22,9 +22,17 @@ sys.path.append(prefix + '../gan-geosteering')
 
 from input_output import read_config
 from GAN import GanLog
+from resitivity import get_resistivity_default
 from vector_to_image import GanEvaluator
 from DP import perform_dynamic_programming, evaluate_earth_model, create_weighted_image
 
+def convert_facies_to_resistivity(single_facies_model):
+    my_shape = single_facies_model.shape
+    result = np.zeros((my_shape[1], my_shape[2]))
+    for i in range(my_shape[1]):
+        for j in range(my_shape[2]):
+            result[i, j] = get_resistivity_default(single_facies_model[:, i, j])
+    return result
 
 # import warnings
 # # Ignore FutureWarning and UserWarning
@@ -50,6 +58,10 @@ def main():
         os.makedirs(plot_path)
 
     saved_legend = False
+
+    synth_truth = np.load('../gan-geosteering/saves/chosen_realization_C1.npz')['arr_0']
+    true_earth_model_facies = gan_evaluator.eval(input_vec=synth_truth)
+    true_resistivity_image = convert_facies_to_resistivity(true_earth_model_facies)
 
     # todo load from the config file! @KriFos1
     # Define the origin
@@ -93,9 +105,7 @@ def main():
         x = np.array(range(64))
         y = np.array(range(64))
         X, Y = np.meshgrid(x, y)
-        synth_truth = np.load(os.path.join(prefix,'../gan-geosteering/saves/chosen_realization_C1.npz'))['arr_0']
-        single_model = gan_evaluator.eval(input_vec=synth_truth)
-        Z = single_model[0, :, :]
+        Z = true_earth_model_facies[0, :, :]
         contour_style = 'dashed'
         contour_color = 'white'
         contour = plt.contour(X, Y, Z, levels=0, colors=contour_color,
