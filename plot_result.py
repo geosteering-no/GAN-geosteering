@@ -69,7 +69,7 @@ def main():
     # Use the 'viridis' colormap
     res_im = ax_res.imshow(true_resistivity_image, aspect='auto', cmap='summer', vmin=1, vmax=200)
     cbar = plt.colorbar(res_im, ax=ax_res)
-    overlay_step = 0
+    em_model_for_overlay_plotting_step = 18
     # plt.show()
 
     # todo load from the config file! @KriFos1
@@ -77,14 +77,17 @@ def main():
     labelled_index = 0
     origin_x = 0
     origin_y = 32
-    drilled_path = [np.array([origin_y, origin_x])]
+    # drilled_path = [np.array([origin_y, origin_x])]
+    drilled_path = []
     num_decission_points = 63
-    for i in range(num_decission_points):
+    for i in range(0, num_decission_points):
         # for i in range(1):
         # Load the decision points
         checkpoint_at_step = np.load(f'estimate_decission_{i}.npz')
         state_vectors = checkpoint_at_step['m']
-        position_at_step = checkpoint_at_step['pos']
+        start_position_at_step = checkpoint_at_step['pos']
+
+        drilled_path.append(start_position_at_step)
 
         # # todo remove test position
         # position_at_step = np.array([33, 4])
@@ -100,7 +103,7 @@ def main():
             [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el])) for el in
              range(ne)])  # range(state.shape[1])])
 
-        next_optimal, _garbage_path = pathfinder().run(state_vectors, position_at_step)
+        next_optimal, _garbage_path = pathfinder().run(state_vectors, start_position_at_step)
 
         # creating the figure
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -135,7 +138,7 @@ def main():
         ax.plot(path_cols, path_rows,
                 'k*', label='Measurement locations')
 
-        if i == overlay_step:
+        if i == em_model_for_overlay_plotting_step:
             ax_res.plot(path_cols, path_rows,
                     'k-', linewidth=3., label='Drilled path')
             ax_res.plot(path_cols, path_rows,
@@ -169,8 +172,8 @@ def main():
         if next_optimal[0] is not None:
 
             # visualizing the next decision
-            path_rows = [position_at_step[0], next_optimal[0]]
-            path_cols = [position_at_step[1], next_optimal[1]]
+            path_rows = [start_position_at_step[0], next_optimal[0]]
+            path_cols = [start_position_at_step[1], next_optimal[1]]
             ax.plot(path_cols, path_rows,
                     'k:', label='Proposed direction')
 
@@ -239,7 +242,7 @@ def main():
             saved_legend = True
 
 
-        drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
+        # drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 
         # plt.show()
 
