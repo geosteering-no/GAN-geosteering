@@ -98,10 +98,15 @@ def main():
         # drilled_path.append(position_at_step)
 
         # this is the posterior
-        # todo should we switch back to probability of sand ???
+
         post_earth = np.array(
             [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el])) for el in
              range(ne)])  # range(state.shape[1])])
+
+        # todo should we switch back to probability of sand ??? (use custom weights)
+        # post_earth = np.array(
+        #     [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el]), weights=[0., 1., 1.]) for el in
+        #      range(ne)])  # range(state.shape[1])])
 
         next_optimal, _garbage_path = pathfinder().run(state_vectors, start_position_at_step)
 

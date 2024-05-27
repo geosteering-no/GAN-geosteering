@@ -163,10 +163,11 @@ def evaluate_earth_model(gan_evaluator, single_realization):
     return normalized_rgb
 
 
-def create_weighted_image(normalized_rgb):
+def create_weighted_image(normalized_rgb, weights=None):
     # note that negative weight of shale can result in no drilling!
     # todo play with weights
-    weights = np.array([0.0, 1.0, 0.5])
+    if weights is None:
+        weights = np.array([0.0, 1.0, 0.5])
     # we are changing negative cost with drilling cost
     return np.dot(normalized_rgb, weights)
 
