@@ -69,7 +69,7 @@ def main():
     # Use the 'viridis' colormap
     res_im = ax_res.imshow(true_resistivity_image, aspect='auto', cmap='summer', vmin=1, vmax=200)
     cbar = plt.colorbar(res_im, ax=ax_res)
-    em_model_for_overlay_plotting_step = 18
+    em_model_for_overlay_plotting_step = 19
     # plt.show()
 
     # todo load from the config file! @KriFos1
@@ -246,7 +246,7 @@ def main():
             fig.savefig(f'{plot_path}legend.pdf', bbox_inches='tight')
             saved_legend = True
 
-
+        fig.close()
         # drilled_path.append(checkpoint_at_step['pos'])# note that we compute another one during viosualization
 
         # plt.show()
