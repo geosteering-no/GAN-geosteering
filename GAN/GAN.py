@@ -45,9 +45,9 @@ class GanLog:
             self.vec_size = 60
 
         if input_dict is not None and "bit_pos" in input_dict:
-            self.pos = [int(el) for el in input_dict['bit_pos']]
+            self.pos = input_dict['bit_pos']
         else:
-            self.pos = [(0,0)]
+            self.pos = [(0, 0)]
 
         #print(self.vec_size)
 

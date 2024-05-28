@@ -155,19 +155,24 @@ gan_evaluator = GanEvaluator(gan_file_name, gan_vec_size)
 
 def evaluate_earth_model(gan_evaluator, single_realization):
     earth_model = gan_evaluator.eval(input_vec=single_realization)
-    rounded_model = np.where(earth_model >= 0, 1, 0)
-    value_for_channel = {
-    1: 1,   # Weight for channel body
-    2: 0.5  # Weight for crevasse
-    }
+    index_model = np.argmax(earth_model[0:3,:,:], axis=0)
+    # rounded_model = np.zeros_like(earth_model, dtype=float)
+    # rounded_model
 
-    result_matrix = calculate_body_sizes(rounded_model, value_for_channel)
+    # rounded_model = np.round((earth_model + 1.)/2.)
+        # np.where(earth_model >= 0, 1, 0))
+    value_for_channel = {
+        1: 1,   # Weight for channel body
+        2: 0.5  # Weight for crevasse
+    }
+    # rounded_model = earth_model
+    result_matrix = calculate_body_sizes(index_model, value_for_channel)
 
     return result_matrix
 
 
 def create_weighted_image(normalized_rgb):
-    weights = np.array([-0.1, 1, 0.5])
+    weights = np.array([0., 1, 0.5])
     return np.dot(normalized_rgb, weights)
 
 
@@ -207,8 +212,9 @@ def process_prior_and_plot_results(single_realization, start_point, plot_path=Fa
     if di_vector is None:
         di_vector = [0, -1, 1]
     # todo implement the discount factor
-    normalized_rgb = evaluate_earth_model(gan_evaluator, single_realization)
-    weighted_image = create_weighted_image(normalized_rgb)
+    # normalized_rgb = evaluate_earth_model(gan_evaluator, single_realization)
+    # weighted_image = create_weighted_image(normalized_rgb)
+    weighted_image = evaluate_earth_model(gan_evaluator, single_realization)
 
     dp_matrix, max_path_value, optimal_path = perform_dynamic_programming(weighted_image, start_point,
                                                                           di_vector=di_vector,
@@ -250,7 +256,13 @@ def process_matrix(single_realization, optimal_path, best_point, best_paths):
     plt.savefig('best.png')
     plt.close()  # Close the plot window to avoid displaying it in GUI
 
-def calculate_body_sizes(single_earth_model_2d, value_for_channel=None):
+def calculate_body_sizes(index_model_2d, value_for_channel=None):
+    """
+
+    :param index_model_2d: provides the index of the facies in each cell
+    :param value_for_channel:
+    :return:
+    """
     if value_for_channel is None:
         # Define the default weights for the channels
         value_for_channel = {
@@ -258,20 +270,26 @@ def calculate_body_sizes(single_earth_model_2d, value_for_channel=None):
             2: 0.5  # Weight for crevasse
         }
 
-
     # Initialize the result matrix with zeros
-    result_matrix = np.zeros_like(single_earth_model_2d[1, :, :], dtype=float)
+    result_matrix = np.zeros_like(index_model_2d, dtype=float)
+
+    max_w = index_model_2d.shape[1]
+    max_h = index_model_2d.shape[0]
 
     # Calculate connected channel-body sizes
-    for w in range(single_earth_model_2d.shape[2]):
-        channel_body_sizes = np.zeros(single_earth_model_2d.shape[1])
+    for w in range(max_w):
+        channel_body_sizes = np.zeros(max_h)
         count = 0
         total_sum = 0
-        for h in range(single_earth_model_2d.shape[1]):
+        for h in range(max_h):
             component_sum = 0
-            for key in value_for_channel:
-                if single_earth_model_2d[key, h, w] > 0:  # Check for the specified cell type
-                    component_sum += value_for_channel[key]
+            if index_model_2d[h,w] in value_for_channel:
+                key = index_model_2d[h,w]
+                component_sum += value_for_channel[key]
+            # for key in value_for_channel:
+            #     # todo change
+            #     if single_earth_model_2d[key, h, w] > 0:  # Check for the specified cell type
+            #         component_sum += value_for_channel[key]
 
             if component_sum > 1:
                 print('Warning, more than one likely component')

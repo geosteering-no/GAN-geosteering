@@ -7,7 +7,7 @@ from input_output import read_config
 from pipt import pipt_init
 
 def main():
-    num_decissions = 1 #64 # number of decissions to make
+    num_decissions = 64 # number of decissions to make
 
     start_position = (32, 0) # initial position of the well
     state = np.load('orig_prior.npz')['m'] # the prior latent vector
