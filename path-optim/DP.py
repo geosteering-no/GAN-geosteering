@@ -155,20 +155,19 @@ gan_evaluator = GanEvaluator(gan_file_name, gan_vec_size)
 
 def evaluate_earth_model(gan_evaluator, single_realization):
     earth_model = gan_evaluator.eval(input_vec=single_realization)
-    earth_model = np.transpose(earth_model[0:3, :, :], axes=(1, 2, 0))
-    scaled_image_data = (earth_model + 1) / 2
-    norm_factors = np.sum(scaled_image_data, axis=-1, keepdims=True)
-    norm_factors[norm_factors == 0] = 1
-    normalized_rgb = scaled_image_data / norm_factors
-    return normalized_rgb
+    rounded_model = np.where(earth_model >= 0, 1, 0)
+    value_for_channel = {
+    1: 1,   # Weight for channel body
+    2: 0.5  # Weight for crevasse
+    }
+
+    result_matrix = calculate_body_sizes(rounded_model, value_for_channel)
+
+    return result_matrix
 
 
-def create_weighted_image(normalized_rgb, weights=None):
-    # note that negative weight of shale can result in no drilling!
-    # todo play with weights
-    if weights is None:
-        weights = np.array([0.0, 1.0, 0.5])
-    # we are changing negative cost with drilling cost
+def create_weighted_image(normalized_rgb):
+    weights = np.array([-0.1, 1, 0.5])
     return np.dot(normalized_rgb, weights)
 
 
@@ -250,6 +249,52 @@ def process_matrix(single_realization, optimal_path, best_point, best_paths):
     # Save the plot to a file
     plt.savefig('best.png')
     plt.close()  # Close the plot window to avoid displaying it in GUI
+
+def calculate_body_sizes(single_earth_model_2d, value_for_channel=None):
+    if value_for_channel is None:
+        # Define the default weights for the channels
+        value_for_channel = {
+            1: 1,   # Weight for channel body
+            2: 0.5  # Weight for crevasse
+        }
+
+
+    # Initialize the result matrix with zeros
+    result_matrix = np.zeros_like(single_earth_model_2d[1, :, :], dtype=float)
+
+    # Calculate connected channel-body sizes
+    for w in range(single_earth_model_2d.shape[2]):
+        channel_body_sizes = np.zeros(single_earth_model_2d.shape[1])
+        count = 0
+        total_sum = 0
+        for h in range(single_earth_model_2d.shape[1]):
+            component_sum = 0
+            for key in value_for_channel:
+                if single_earth_model_2d[key, h, w] > 0:  # Check for the specified cell type
+                    component_sum += value_for_channel[key]
+
+            if component_sum > 1:
+                print('Warning, more than one likely component')
+
+            if component_sum > 0:
+                total_sum += component_sum
+                count += 1
+            else:
+                # Update the entire connected component with the combined count using slicing
+                if count > 0:
+                    channel_body_sizes[h - count:h] = total_sum
+                count = 0
+                total_sum = 0
+
+        # Ensure the last component is updated
+        if count > 0:
+            channel_body_sizes[h - count + 1:h + 1] = total_sum
+
+        # Assign the calculated sizes to the result tensor
+        result_matrix[:, w] = channel_body_sizes
+
+    return result_matrix
+
 
 
 # Example of calling the renamed function with the prior data
