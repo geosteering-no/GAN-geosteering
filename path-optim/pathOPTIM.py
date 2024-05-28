@@ -38,6 +38,7 @@ class pathfinder():
 
         return path
 
+    # todo the cost vector is assigned inconsistantly in several places - prone to bugs when changing code
     def get_cost_vector(self, dy_vector=None, cost_mult=0.02):
         if dy_vector is None:
             dy_vector = np.array([0, -1, 1])

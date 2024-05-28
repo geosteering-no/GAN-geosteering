@@ -7,6 +7,7 @@ from input_output import read_config
 from pipt import pipt_init
 
 def main():
+    start = 18
     num_decissions = 64 # number of decissions to make
 
     start_position = (32, 0) # initial position of the well
@@ -24,7 +25,7 @@ def main():
 
     kd, kf = read_config.read_txt('es.pipt')  # read the config file.
 
-    for i in range(num_decissions):
+    for i in range(start, num_decissions):
         # start by assimilating data at the current position
 
         #make a set of syntetic data for the current position

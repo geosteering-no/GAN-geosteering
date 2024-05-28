@@ -14,3 +14,13 @@ path-optim/PathOPTIM.egg-info/
 *.npz
 
 figures12/
+
+__pycache__/
+
+data/
+
+mean_earth.png
+
+mean_earth.pdf
+
+why_iter_loop_stopped.p
