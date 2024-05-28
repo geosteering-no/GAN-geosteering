@@ -24,7 +24,7 @@ from input_output import read_config
 from GAN import GanLog
 from resitivity import get_resistivity_default
 from vector_to_image import GanEvaluator
-from DP import perform_dynamic_programming, evaluate_earth_model, create_weighted_image
+from DP import perform_dynamic_programming, evaluate_earth_model, create_weighted_image, earth_model_from_vector
 
 def convert_facies_to_resistivity(single_facies_model):
     my_shape = single_facies_model.shape
@@ -99,13 +99,13 @@ def main():
 
         # this is the posterior
 
-        post_earth = np.array(
-            [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el])) for el in
-             range(ne)])  # range(state.shape[1])])
+        # post_earth = np.array(
+        #     [create_weighted_image(earth_model_from_vector(gan_evaluator, state_vectors[:, el])) for el in
+        #      range(ne)])  # range(state.shape[1])])
 
         # todo should we switch back to probability of sand ??? (use custom weights)
         post_earth = np.array(
-            [create_weighted_image(evaluate_earth_model(gan_evaluator, state_vectors[:, el]), weights=[0., 1., 1.]) for el in
+            [create_weighted_image(earth_model_from_vector(gan_evaluator, state_vectors[:, el]), weights=[0., 1., 1.]) for el in
              range(ne)])  # range(state.shape[1])])
 
         next_optimal, _garbage_path = pathfinder().run(state_vectors, start_position_at_step)

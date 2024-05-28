@@ -153,6 +153,11 @@ gan_vec_size = 60
 gan_evaluator = GanEvaluator(gan_file_name, gan_vec_size)
 
 
+def earth_model_from_vector(gan_evaluator, single_realization, ):
+    earth_model = gan_evaluator.eval(input_vec=single_realization)
+    rounded_model = np.round((earth_model[0:3, :, :] + 1.) / 2.)
+    return rounded_model
+
 def evaluate_earth_model(gan_evaluator, single_realization):
     earth_model = gan_evaluator.eval(input_vec=single_realization)
     index_model = np.argmax(earth_model[0:3,:,:], axis=0)
@@ -171,9 +176,14 @@ def evaluate_earth_model(gan_evaluator, single_realization):
     return result_matrix
 
 
-def create_weighted_image(normalized_rgb):
-    weights = np.array([0., 1, 0.5])
-    return np.dot(normalized_rgb, weights)
+def create_weighted_image(normalized_rgb, weights=None, max_value=1.0):
+    if weights is None:
+        weights = np.array([0., 1, 0.5])
+    if isinstance(weights, list):
+        weights = np.array(weights)
+    result = np.tensordot(normalized_rgb, weights, axes=(0, 0))
+    result = np.minimum(result, max_value)
+    return result
 
 
 def perform_dynamic_programming(weighted_image, start_point, discount_factor=1.0,

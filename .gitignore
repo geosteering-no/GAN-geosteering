@@ -12,3 +12,5 @@ path-optim/__pycache__/
 path-optim/PathOPTIM.egg-info/
 
 *.npz
+
+figures12/
