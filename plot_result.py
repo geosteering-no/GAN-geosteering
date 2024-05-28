@@ -237,7 +237,8 @@ def main():
         ax.set_yticklabels(y_ticks_labels_str)
 
         # todo remove
-        i = 'prior'
+        i = 'prior_colorbar'
+        plt.colorbar(im, ax=ax)
 
         fig.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
         fig.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
