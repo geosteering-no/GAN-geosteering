@@ -2,3 +2,13 @@
 .idea/
 
 GAN/GanLOG.egg-info/
+
+figures/
+
+GAN/__pycache__/
+
+path-optim/__pycache__/
+
+path-optim/PathOPTIM.egg-info/
+
+*.npz

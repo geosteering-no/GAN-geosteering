@@ -2,7 +2,7 @@
 Wrap the GAN earth model parametrization and the ML logging tool into a PET compatible framework
 """
 import numpy as np
-import os,sys,threading
+import os,sys
 from copy import deepcopy
 
 # adjust relative path
