@@ -59,6 +59,9 @@ def main():
 
     saved_legend = False
 
+    orig_prior_from_npz = np.load('orig_prior.npz')
+    orig_prior = orig_prior_from_npz['m']
+
     synth_truth = np.load('../gan-geosteering/saves/chosen_realization_C1.npz')['arr_0']
     true_earth_model_facies = gan_evaluator.eval(input_vec=synth_truth)
     true_resistivity_image = convert_facies_to_resistivity(true_earth_model_facies)
@@ -80,11 +83,14 @@ def main():
     # drilled_path = [np.array([origin_y, origin_x])]
     drilled_path = []
     num_decission_points = 63
-    for i in range(0, num_decission_points):
-        # for i in range(1):
+    # todo change back
+    # for i in range(0), num_decission_points):
+    for i in range(1):
         # Load the decision points
         checkpoint_at_step = np.load(f'estimate_decission_{i}.npz')
         state_vectors = checkpoint_at_step['m']
+        # todo remove
+        state_vectors = orig_prior
         start_position_at_step = checkpoint_at_step['pos']
 
         drilled_path.append(start_position_at_step)
@@ -174,8 +180,10 @@ def main():
             fig_res.savefig(f'{plot_path}true_resistivity_{i}.png', bbox_inches='tight', dpi=600)
             fig_res.savefig(f'{plot_path}true_resistivity_{i}.pdf', bbox_inches='tight')
 
-        if next_optimal[0] is not None:
+        # todo remove:
 
+        # if next_optimal[0] is not None:
+        if False:
             # visualizing the next decision
             path_rows = [start_position_at_step[0], next_optimal[0]]
             path_cols = [start_position_at_step[1], next_optimal[1]]
@@ -227,6 +235,9 @@ def main():
         # Set y-ticks and labels
         ax.set_yticks(y_ticks_positions)
         ax.set_yticklabels(y_ticks_labels_str)
+
+        # todo remove
+        i = 'prior'
 
         fig.savefig(f'{plot_path}mean_earth_{i}.png', bbox_inches='tight')
         fig.savefig(f'{plot_path}mean_earth_{i}.pdf', bbox_inches='tight')
