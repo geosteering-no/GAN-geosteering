@@ -9,14 +9,14 @@ from copy import deepcopy
 if __name__ == '__main__':
     prefix = '../'
     # local load of additional modules.
-    # paths are relative to the GAN-geosteering root
-    sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/KERNEL')
-    sys.path.append(prefix + '../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY')
-    sys.path.append(prefix + '../gan-geosteering')
     # TODO check paths here
 else:
     prefix = ''
 
+# paths are relative to the GAN-geosteering root
+sys.path.append(prefix + '../deep-borehole-inverse-problem/KERNEL')
+sys.path.append(prefix + '../deep-borehole-inverse-problem/USER_SERGEY')
+sys.path.append(prefix + '../gan-geosteering-prestudy-internal')
 
 
 import mcwd_converter
@@ -37,7 +37,7 @@ class GanLog:
         if input_dict is not None and "file_name" in input_dict:
             self.file_name = input_dict["file_name"]
         else:
-            self.file_name = prefix+'../gan-geosteering/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
+            self.file_name = prefix+'../gan-geosteering-prestudy-internal/f2020_rms_5_10_50_60/netG_epoch_4662.pth'
 
         if input_dict is not None and "vec_size" in input_dict:
             self.vec_size = int(input_dict["vec_size"])
@@ -116,7 +116,7 @@ class GanLog:
 
         self.gan_evaluator = GanEvaluator(self.file_name, self.vec_size)
         self.mcwd_evaluator = DnnEvaluatorMcwd(
-            trained_model_directory=prefix+'../deepEMdeepML2/deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
+            trained_model_directory=prefix+'../deep-borehole-inverse-problem/USER_SERGEY/Adaptive_architecture_2_dataset84599_11746',
             experiment_name="Adaptive_architecture_2")
         # TODO check paths here
 
