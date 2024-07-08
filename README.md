@@ -30,3 +30,16 @@ Run the EnKF sequential assimilation by
 `
 python run_script.py
 `
+
+# Run the Web Application
+The Web Application is by Streamlit. First, ensure that Streamlit is installed by
+
+'
+pip install streamlit
+'
+
+Then start the application by the following command
+
+'
+streamlit run Run_WF_streamlit_Dash.py
+'
