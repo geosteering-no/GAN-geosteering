@@ -3,6 +3,26 @@ The code to reproduce the results of the paper "DISTINGUISH workflow: a new para
 
 **This repository is a work in progress, and some of the dependencies are not open yet due to contractual obligations.** We are working on opening all the components or replacing them with open analogs. Please create an issue to stay up-to-date with the developments. 
 
+## Cite as:
+
+Alyaev, S., Fossum, K., Djecta, H. E., Tveranger, J., & Elsheikh, A. (2024). **DISTINGUISH Workflow: a New Paradigm of Dynamic Well Placement Using Generative Machine Learning**. In *ECMOR 2024*. (Vol. 2024, No. 1, pp. 1-16). European Association of Geoscientists & Engineers. DOI: https://doi.org/10.3997/2214-4609.202437018
+
+### Latex
+
+```
+@article{fossum2024ensemble,
+  title={Ensemble history-matching workflow using interpretable SPADE-GAN geomodel},
+  author={Fossum, Kristian and Alyaev, Sergey and Elsheikh, Ahmed H},
+  journal={First Break},
+  volume={42},
+  number={2},
+  pages={57--63},
+  year={2024},
+  publisher={European Association of Geoscientists \& Engineers},
+  doi={https://doi.org/10.3997/2214-4609.202437018}
+}
+```
+
 # Setup
 
 USE a virtual environment and update pip and setup-tools
@@ -29,4 +49,6 @@ Run the EnKF sequential assimilation by
 
 `
 python run_script.py
+
+#
 `
