@@ -1,5 +1,5 @@
 # GAN-geosteering
-The code to reproduce the results of the paper ["DISTINGUISH workflow: a new paradigm of dynamic well placement using generative machine learning" presented at ECMOR 2024](#cite-as).
+The code to reproduce the results of the paper ["DISTINGUISH workflow: a new paradigm of dynamic well placement using generative machine learning"](#cite-as) presented at ECMOR 2024.
 
 **This repository is a work in progress, and some of the dependencies are not open yet due to contractual obligations.** We are working on opening all the components or replacing them with open analogs. Please create an issue to stay up-to-date with the developments. 
 
