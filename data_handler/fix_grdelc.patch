@@ -1,0 +1,14 @@
+diff --git a/misc/grdecl.py b/misc/grdecl.py
+index 02c9507..6bcecba 100644
+--- a/misc/grdecl.py
++++ b/misc/grdecl.py
+@@ -966,6 +966,9 @@ _SECTIONS = {
+     'ELEVATIONGENERAL':    {'slashed': True,  'result': True,  'cell': True, },
+     'FACIES':              {'slashed': True,  'result': True,  'cell': True,
+                             'dtype':   numpy.int32},
++    'Formation_factor':    {'slashed': True,  'result': True,  'cell': True, },
++    'ConnectedChannels_only':    {'slashed': True,  'result': True,  'cell': True, },
++    'Resistivity_rock+porewater':{'slashed': True,  'result': True,  'cell': True, }
+ }
+ 
+ 
