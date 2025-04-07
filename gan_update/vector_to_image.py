@@ -2,9 +2,12 @@ import dcgan
 import utils as myutils
 import torch
 import numpy as np
+import os
 import mcwd_converter
-import matplotlib.pyplot as plt
+from PIL import Image
 
+
+from evaluation import evaluate_geological_realism
 
 class GanEvaluator:
     def __init__(self, load_file_name, vec_size, output_size=64, number_chanels=6, device='cpu', num_gpus=0):
@@ -122,23 +125,45 @@ class GanEvaluator:
 
 
 if __name__ == "__main__":
+    image_folder = r'C:\NORCE_Projects\DISTINGUISH\Temp'
+
+    result_file = os.path.join(image_folder, '{}.csv'.format('generated'))
+    result_handler = open(result_file, 'a+')
+
     device = 'cpu'
     np.random.seed(42)
 
-    # file_name = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\f2020_rms_5_10_50_60\netG_epoch_4662.pth'
-    file_name = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_32_32_50_60\netG_epoch_3996.pth'
-    # file_name = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_new_32_32_50_60\netG_epoch_3996.pth'
+    file_name = r'C:\NORCE_Projects\DISTINGUISH\code\GAN-geosteering\gan_update\grdecl_32_32_50_60\netG_epoch_3996.pth'
     vec_size = 60
     gan_evaluator = GanEvaluator(file_name, vec_size, number_chanels=6)
-    my_vec = np.random.normal(size=vec_size)
-    result = gan_evaluator.eval(input_vec=my_vec)
-    print(result)
-    image_data = np.transpose(result[0:3, :, :], axes=(1, 2, 0))
-    plt.imshow(image_data,  aspect='auto')
-    plt.show()
-    column_of_pixels = result[:, :, 0]
-    mcwd_input = mcwd_converter.convert_to_mcwd_input(column_of_pixels, 32)
-    print(mcwd_input)
+
+    counter = 0
+
+    for _ in range(3000):
+        my_vec = np.random.normal(size=vec_size)
+        result = gan_evaluator.eval(input_vec=my_vec)
+        image_data = np.transpose(result[0:3, :, :], axes=(1, 2, 0))
+        patch_normalized = np.rot90((np.clip(image_data, 0, 1) * 255).astype(np.uint8))
+
+        # Convert to PIL image and save
+        img = Image.fromarray(patch_normalized)
+        filename = os.path.join(image_folder, '{}.png'.format(counter))
+        img.save(filename)
+        print(f"Image saved to {filename}")
+
+        realism_score = evaluate_geological_realism(patch_normalized)
+        result_handler.write('{}\n'.format(realism_score))
+        result_handler.flush()
+        print(realism_score)
+
+        counter += 1
+
+    result_handler.close()
+    # plt.imshow(image_data,  aspect='auto')
+    # plt.show()
+    # column_of_pixels = result[:, :, 0]
+    # mcwd_input = mcwd_converter.convert_to_mcwd_input(column_of_pixels, 32)
+    # print(mcwd_input)
 
 
 
