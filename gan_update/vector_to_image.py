@@ -125,7 +125,7 @@ class GanEvaluator:
 
 
 if __name__ == "__main__":
-    image_folder = r'C:\NORCE_Projects\DISTINGUISH\Temp'
+    image_folder = 'images_test'
 
     result_file = os.path.join(image_folder, '{}.csv'.format('generated'))
     result_handler = open(result_file, 'a+')
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     device = 'cpu'
     np.random.seed(42)
 
-    file_name = r'C:\NORCE_Projects\DISTINGUISH\code\GAN-geosteering\gan_update\grdecl_32_32_50_60\netG_epoch_3996.pth'
+    file_name = 'grdecl_32_32_50_60/netG_epoch_3996.pth'
     vec_size = 60
     gan_evaluator = GanEvaluator(file_name, vec_size, number_chanels=6)
 

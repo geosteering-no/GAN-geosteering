@@ -6,6 +6,7 @@ import random
 import torch.optim as optim
 import torch.utils.data
 import os
+from tqdm import tqdm
 
 import dcgan
 import utils as myutils
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     parser.add_argument('--nz', type=int, default=60, help='size of the latent z vector')
     parser.add_argument('--ngf', type=int, default=64)
     parser.add_argument('--ndf', type=int, default=64)
-    parser.add_argument('--niter', type=int, default=4000, help='number of epochs to train for')
+    parser.add_argument('--niter', type=int, default=15000, help='number of epochs to train for')
     parser.add_argument('--lrD', type=float, default=0.00005, help='learning rate for Critic, default=0.00005')
     parser.add_argument('--lrG', type=float, default=0.00005, help='learning rate for Generator, default=0.00005')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -44,8 +45,8 @@ if __name__ == '__main__':
     parser.add_argument('--adam', default=False, action='store_true', help='Whether to use adam (default is rmsprop)')
     parser.add_argument('--maxSamples', type=int, default=100000, help='Max samples to use for training')
     parser.add_argument('--maxFiles', type=int, default=50, help='Max files to use for training')
-    parser.add_argument('--strideX', type=int, default=32, help='strid in x direction')
-    parser.add_argument('--strideY', type=int, default=32, help='strid in y direction')
+    parser.add_argument('--strideX', type=int, default=11, help='strid in x direction')
+    parser.add_argument('--strideY', type=int, default=7, help='strid in y direction')
     parser.add_argument('--device', default='cuda:0', help='device to run')
 
     opt = parser.parse_args()
@@ -77,7 +78,7 @@ if __name__ == '__main__':
     # device = torch.device(opt.device if torch.cuda.is_available() else "cpu")
     #device = torch.device("cpu")
     # print("device type", device.type)
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # device = 'cpu'
 
 
@@ -94,7 +95,7 @@ if __name__ == '__main__':
         netG = dcgan.DCGAN_G(opt.imageSize, nz, nc, ngf, ngpu, n_extra_layers).to(device)
     netG.apply(myutils.weights_init)
 
-    netg_prev = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_32_32_50_60\netG_epoch_777.pth'
+    # netg_prev = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_32_32_50_60\netG_epoch_777.pth'
     # netG.load_state_dict(torch.load(netg_prev))
 
     if opt.netG != '':  # load checkpoint if needed
@@ -110,7 +111,7 @@ if __name__ == '__main__':
         netD = dcgan.DCGAN_D(opt.imageSize, nz, nc, ndf, ngpu, n_extra_layers).to(device)
 
     netD.apply(myutils.weights_init)
-    netd_prev = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_32_32_50_60\netD_epoch_777.pth'
+    # netd_prev = r'C:\NORCE_Projects\DISTINGUISH\code\src\gan-geosteering-prestudy-internal-master\grdecl_32_32_50_60\netD_epoch_777.pth'
     # netD.load_state_dict(torch.load(netd_prev))
 
     if opt.netD != '':
@@ -154,7 +155,7 @@ if __name__ == '__main__':
         #                                  constant_axis=1,
         #                                  min_facies_id=0,
         #                                  do_flip=False)
-        folder_name = r'T:\600\60010\FakeImageDataset\Distinguish'
+        folder_name = '../../../data/gan_training'
         dataset = \
             myutils.CustomDatasetFromGRD(folder_name, opt.imageSize, opt.imageSize, transforms=None,
                                          channels=nc,
@@ -186,7 +187,7 @@ if __name__ == '__main__':
         optimizerG = optim.RMSprop(netG.parameters(), lr=opt.lrG)
 
     gen_iterations = 0
-    for epoch in range(opt.niter):
+    for epoch in tqdm(range(opt.niter)):
         data_iter = iter(dataloader)
         i = 0
         while i < len(dataloader):
@@ -267,12 +268,22 @@ if __name__ == '__main__':
                                    '{0}/fake_sample0_{1}.png'.format(opt.experiment, gen_iterations % 5000),
                                    device)
 
-        if epoch % 111 == 0:
+        if (epoch+1) % 100 == 0:
             # do checkpointing
-            torch.save(netG.state_dict(), '{0}/netG_epoch_{1}.pth'.format(opt.experiment, epoch))
-            torch.save(netD.state_dict(), '{0}/netD_epoch_{1}.pth'.format(opt.experiment, epoch))
+            torch.save(netG.state_dict(), '{0}/netG_epoch_{1}.pth'.format(opt.experiment, epoch+1))
+            torch.save(netD.state_dict(), '{0}/netD_epoch_{1}.pth'.format(opt.experiment, epoch+1))
 
+            print("Saved after epoch {}".format(epoch+1))
+
+            # saving epochal images
             myutils.save_image(x_real,
-                               '{0}/real_tmp.png'.format(opt.experiment),
+                               '{0}/real_epoch_{1}.png'.format(opt.experiment, epoch+1),
                                device)
-            print("Saved after epoch {}".format(epoch))
+            x_fake = netG(fixed_noise_vec)
+            myutils.save_image(x_fake,
+                               '{0}/fake_epoch_{1}.png'.format(opt.experiment, epoch+1),
+                               device)
+            x_fake_at_zero = netG(fixed_zero_vec)
+            myutils.save_image(x_fake_at_zero,
+                               '{0}/fake_epoch_at0_{1}.png'.format(opt.experiment, epoch+1),
+                               device)

@@ -1,0 +1,8 @@
+torch==2.7.0
+torchvision==0.22.0
+numpy==1.23.5
+pyvista==0.44.1
+scipy==1.15.3
+scikit_image==0.25.2
+opencv_python==4.11.0.86
+tqdm==4.67.1
