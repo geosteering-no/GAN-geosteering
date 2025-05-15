@@ -12,6 +12,21 @@ import dcgan
 import utils as myutils
 
 
+def set_global_seed(seed: int):
+    import random
+    import numpy as np
+    import torch
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+
 if __name__ == '__main__':
 
     FileNotFoundError = IOError
@@ -44,9 +59,9 @@ if __name__ == '__main__':
     parser.add_argument('--experiment', default=None, help='Where to store samples and models')
     parser.add_argument('--adam', default=False, action='store_true', help='Whether to use adam (default is rmsprop)')
     parser.add_argument('--maxSamples', type=int, default=100000, help='Max samples to use for training')
-    parser.add_argument('--maxFiles', type=int, default=50, help='Max files to use for training')
-    parser.add_argument('--strideX', type=int, default=11, help='strid in x direction')
-    parser.add_argument('--strideY', type=int, default=7, help='strid in y direction')
+    parser.add_argument('--maxFiles', type=int, default=1, help='Max files to use for training')
+    parser.add_argument('--strideX', type=int, default=15, help='strid in x direction')
+    parser.add_argument('--strideY', type=int, default=15, help='strid in y direction')
     parser.add_argument('--device', default='cuda:0', help='device to run')
 
     opt = parser.parse_args()
@@ -63,8 +78,7 @@ if __name__ == '__main__':
 
     opt.manualSeed = 1234  # random.randint(1, 10000)  # fix seed
     print("Random Seed: ", opt.manualSeed)
-    random.seed(opt.manualSeed)
-    torch.manual_seed(opt.manualSeed)
+    set_global_seed(opt.manualSeed)
 
     try:
         print('===========================')

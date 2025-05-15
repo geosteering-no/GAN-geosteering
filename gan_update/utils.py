@@ -540,6 +540,7 @@ class CustomDatasetFromGRD(Dataset):
 
         # huge memory but loaded only parts are loaded on the GPU sequentially
         total_samples = min(max_samples, n_images_x * n_images_y * num_images)
+        print(f'Potential samples: {n_images_x * n_images_y * num_images}, but loaded {max_samples}')
         patches_np = np.empty(
             (total_samples,
              nc,
