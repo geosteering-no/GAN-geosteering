@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import os
 import mcwd_converter
-from PIL import Image
+from PIL import Image, ImageOps
 
 import random
 
@@ -143,13 +143,14 @@ if __name__ == "__main__":
         my_vec = np.random.normal(size=vec_size)
         result = gan_evaluator.eval(input_vec=my_vec, to_one_hot=True, output_np=False)
 
-        image_to_columns(result)
+        columns = image_to_columns(result)
 
-        image_data = np.transpose(result[0:3, :, :], axes=(1, 2, 0))
+        image_data = result[0, 0:3, :, :].permute(1,2,0).cpu().numpy()
         patch_normalized = np.rot90((np.clip(image_data, 0, 1) * 255).astype(np.uint8))
 
         # Convert to PIL image and save
         img = Image.fromarray(patch_normalized)
+        img = ImageOps.flip(img)
         filename = os.path.join(image_folder, '{}.png'.format(counter))
         img.save(filename)
         print(f"Image saved to {filename}")
