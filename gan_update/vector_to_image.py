@@ -5,7 +5,7 @@ import utils as myutils
 import torch
 import numpy as np
 import os
-import mcwd_converter
+import image_to_log
 from PIL import Image, ImageOps
 
 import random
