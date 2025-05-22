@@ -16,7 +16,7 @@ class EMProxy(EMConvModel):
         self.eval()
         self.scaler = scaler
 
-    def image_to_log(self, column_input, tool_index):
+    def image_and_index_to_log(self, column_input, tool_index):
         # convert tool index to one-hot vector (same size as column_input)
         one_hot_index = F.one_hot(tool_index, num_classes=column_input.shape[1])
         # now we need to stack it on top of the column_input
@@ -24,6 +24,9 @@ class EMProxy(EMConvModel):
         stacked_input = torch.cat([column_input, one_hot], dim=1)  # [B, c+1, L]
 
         return self.eval(stacked_input)
+
+    def image_to_log(self, input_tensor):
+        return self.eval(input_tensor)
 
 def set_global_seed(seed: int):
     random.seed(seed)
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     input_shape = (3, 128)
     output_shape = (6, 18)
 
-    model = EMConvModel(input_shape, output_shape).to(device)
+    model = EMProxy(input_shape, output_shape).to(device)
 
     weights_folder = "../../UTA-proxy/training_results"
     # check path by converting string to path
@@ -71,5 +74,5 @@ if __name__ == "__main__":
     column_input = torch.randn(1, 6, 64, 64)  # Example input tensor
     tool_index = torch.tensor([0])  # Example tool index
 
-    log_output = image_to_log(column_input, tool_index)
+    log_output = model.image_and_index_to_log(column_input, tool_index)
     print(log_output)

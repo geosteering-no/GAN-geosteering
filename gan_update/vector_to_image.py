@@ -38,7 +38,7 @@ class GanEvaluator:
                 device)
         netG.apply(myutils.weights_init)
         print('Loading GAN from {}'.format(load_file_name))
-        netG.load_state_dict(torch.load(load_file_name, map_location='cpu'))
+        netG.load_state_dict(torch.load(load_file_name, map_location=device))
         netG.eval()
 
         self.netG = netG
