@@ -102,17 +102,24 @@ if __name__ == "__main__":
 
     # example usage
     my_latent_vec_np = np.random.normal(size=vec_size)
-    my_latent_tensor = torch.Tensor(my_latent_vec_np).unsqueeze(0).to(device)  # Add batch dimension and move to device
+    my_latent_tensor = torch.tensor(my_latent_vec_np, dtype=torch.float32).unsqueeze(0).to(device)  # Add batch dimension and move to device
     # make index vector with all ints = 32
     index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
 
     logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw)
+
+    my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
+    index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
+    jacobean = torch.autograd.functional.jacobian(lambda x: full_model.forward(x, index_vector=index_tensor_bw),
+                                                  my_latent_tensor,
+                                                  create_graph=False)
 
     logs_np = logs.cpu().detach().numpy()
 
     cols, setups, log_types = logs_np.shape
     names = [f'log_{i}' for i in range(log_types)]
     # todo figure out log names
+    names[0] = 'my log 0'
     names[10] = 'my very special log'
     for i in range(log_types):
         plt.figure()
