@@ -110,10 +110,15 @@ if __name__ == "__main__":
 
     logs_np = logs.cpu().detach().numpy()
 
-    # todo figure out how to consistently plot the logs
-    plt.figure()
-    logs_to_plot = logs_np[:, 0, :]  # take the first batch and first channel
-    plt.plot(logs_to_plot)
+    cols, setups, log_types = logs_np.shape
+    names = [f'log_{i}' for i in range(log_types)]
+    # todo figure out log names
+    names[10] = 'my very special log'
+    for i in range(log_types):
+        plt.figure()
+        plt.title(names[i])
+        logs_to_plot = logs_np[:, :, i]  # take the first batch and first channel
+        plt.plot(logs_to_plot)
     plt.show()
 
 
