@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
+# from functorch import jacrev # alternative jacobean computation
 
 import matplotlib.pyplot as plt
 
@@ -33,14 +34,19 @@ class FullModel:
                          .to(device))
         # in case the model needs to be put in the eval mode
         self.em_model.eval()
+        self.em_model.requires_grad_(False)
 
-    def convert_to_resistivity_format(self, image, index_vector):
-        # convert index to one-hot vector
-        rh = (image * self.rh_mult).sum(dim=1, keepdim=True)
-        rv = (image * self.rv_mult).sum(dim=1, keepdim=True)
+    def convert_to_resistivity_format(self, images, index_vector):
         # add eval location
-        one_hot = F.one_hot(index_vector, num_classes=image.shape[2]).float()  # [b, w, h]
+        one_hot = F.one_hot(index_vector, num_classes=images.shape[2]).float()  # [b, w, h]
         one_hot = one_hot.permute(0, 2, 1).unsqueeze(1)  # [b, 1, h, w]
+
+        # reduce image to the index vector w
+        images = images[:, :, :, 0:index_vector.shape[1]]  # [b, c, h, w]
+
+        # convert index to one-hot vector
+        rh = (images * self.rh_mult).sum(dim=1, keepdim=True)
+        rv = (images * self.rv_mult).sum(dim=1, keepdim=True)
 
         resistivity = torch.cat([rh, rv, one_hot], dim=1)  # [b, 3, h, w]
         # now we need to scale it to the input dimensions
@@ -75,6 +81,7 @@ if __name__ == "__main__":
     set_global_seed(seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = 'cpu'  # for testing purposes, use CPU
 
     file_name = 'grdecl_15_15_1_60/netG_epoch_15000.pth'
     vec_size = 60
@@ -109,10 +116,13 @@ if __name__ == "__main__":
     logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw)
 
     my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
-    index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
+    index_tensor_bw = torch.full((1, 2), fill_value=32, dtype=torch.long).to(device)
     jacobean = torch.autograd.functional.jacobian(lambda x: full_model.forward(x, index_vector=index_tensor_bw),
                                                   my_latent_tensor,
-                                                  create_graph=False)
+                                                  create_graph=False,
+                                                  vectorize=True)
+
+    jacobean_np = jacobean.cpu().detach().numpy()
 
     logs_np = logs.cpu().detach().numpy()
 
