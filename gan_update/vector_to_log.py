@@ -47,12 +47,18 @@ class FullModel:
 
         b, c, h, w = resistivity.shape
         resistivity = resistivity.permute(0, 3, 1, 2)  # → [b, w, c, h]
-        resistivity = resistivity.reshape(b * w, c, h)  # → merge b and w
+        resistivity_flat = resistivity.reshape(b * w, c, h)  # → merge b and w
+        resistivity_padded_flat = F.pad(resistivity_flat, (self.pad_top, self.pad_bottom), mode='replicate')  # pad h only
 
-        resistivity_padded = F.pad(resistivity, (self.pad_top, self.pad_bottom), mode='replicate')  # pad h only
-        return resistivity_padded
+        # pad requires the input of the padding in two directions for the last dimensions in the reverse order
+        # resistivity_padded = F.pad(resistivity, (self.pad_top, self.pad_bottom, 0, 0), mode='replicate')
+
+        return resistivity_padded_flat
 
     def forward(self, x, index_vector):
+        """
+        the output is flattened in batch and width dimensions
+        """
         # Generate image from latent vector
         gan_output = self.gan_evaluator.eval(input_vec=x, to_one_hot=True, output_np=False)
 
@@ -105,7 +111,8 @@ if __name__ == "__main__":
 
     # todo figure out how to consistently plot the logs
     plt.figure()
-    plt.plot(logs_np[0, :, 0, :])
+    logs_to_plot = logs_np[:, 0, :]  # take the first batch and first channel
+    plt.plot(logs_to_plot)
     plt.show()
 
 
