@@ -7,11 +7,10 @@ import torch.nn.functional as F
 
 from mymodel import EMConvModel
 
-
 class EMProxy(EMConvModel):
-    def __init__(self, input_shape, output_shape, checkpoint=None, device='cpu', scaler=None):
+    def __init__(self, input_shape, output_shape, checkpoint_path=None, device='cpu', scaler=None):
         super(EMProxy, self).__init__(input_shape, output_shape)
-        checkpoint = torch.load(f'{weights_folder}/{checkpoint_name}', map_location=device)
+        checkpoint = torch.load(checkpoint_path, map_location=device)
         self.load_state_dict(checkpoint['model_state_dict'])
         self.eval()
         self.scaler = scaler
@@ -23,10 +22,10 @@ class EMProxy(EMConvModel):
         one_hot = one_hot_index.unsqueeze(1)  # [B, c, L]
         stacked_input = torch.cat([column_input, one_hot], dim=1)  # [B, c+1, L]
 
-        return self.eval(stacked_input)
+        return self.forward(stacked_input)
 
     def image_to_log(self, input_tensor):
-        return self.eval(input_tensor)
+        return self.forward(input_tensor)
 
 def set_global_seed(seed: int):
     random.seed(seed)

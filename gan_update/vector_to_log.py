@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from sympy import factor
+import matplotlib.pyplot as plt
 
 from image_to_log import set_global_seed
 
@@ -28,7 +28,9 @@ class FullModel:
 
         # Initialize EM model
         self.proxi_input_shape = proxi_input_shape
-        self.em_model = image_to_log.EMConvModel(proxi_input_shape, proxi_output_shape).to(device)
+        self.em_model = (image_to_log.EMProxy(proxi_input_shape, proxi_output_shape,
+                                             checkpoint_path=proxi_save_file)
+                         .to(device))
         # in case the model needs to be put in the eval mode
         self.em_model.eval()
 
@@ -52,12 +54,12 @@ class FullModel:
 
     def forward(self, x, index_vector):
         # Generate image from latent vector
-        gan_output = self.gan_evaluator.eval(input_vec=x, to_one_hot=False, output_np=False)
+        gan_output = self.gan_evaluator.eval(input_vec=x, to_one_hot=True, output_np=False)
 
         resistivity_padded = self.convert_to_resistivity_format(gan_output, index_vector)
 
         # Convert image to log
-        em_output = self.em_model.image_to_log(resistivity_padded, tool_index=0)
+        em_output = self.em_model.image_to_log(resistivity_padded)
 
         return em_output
 
@@ -99,6 +101,12 @@ if __name__ == "__main__":
 
     logs = full_model.forward(my_latent_vec, index_vector=index_tensor_bw)
 
+    logs_np = logs.cpu().detach().numpy()
+
+    # todo figure out how to consistently plot the logs
+    plt.figure()
+    plt.plot(logs_np[0, :, 0, :])
+    plt.show()
 
 
 
