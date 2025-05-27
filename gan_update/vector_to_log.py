@@ -60,7 +60,7 @@ class FullModel:
         the output is flattened in batch and width dimensions
         """
         # Generate image from latent vector
-        gan_output = self.gan_evaluator.eval(input_vec=x, to_one_hot=True, output_np=False)
+        gan_output = self.gan_evaluator.eval(input_latent_ensemble=x, to_one_hot=True)
 
         resistivity_padded = self.convert_to_resistivity_format(gan_output, index_vector)
 
@@ -101,11 +101,12 @@ if __name__ == "__main__":
     )
 
     # example usage
-    my_latent_vec = np.random.normal(size=vec_size)
+    my_latent_vec_np = np.random.normal(size=vec_size)
+    my_latent_tensor = torch.Tensor(my_latent_vec_np).unsqueeze(0).to(device)  # Add batch dimension and move to device
     # make index vector with all ints = 32
     index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
 
-    logs = full_model.forward(my_latent_vec, index_vector=index_tensor_bw)
+    logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw)
 
     logs_np = logs.cpu().detach().numpy()
 

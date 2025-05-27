@@ -47,26 +47,35 @@ class GanEvaluator:
         self.image_size = imageSize
         self.device = device
 
-    def eval(self, input_ensemble: np.ndarray = None, input_vec=None, to_one_hot=False, output_np=True):
+    def eval(self,
+             input_latent_ensemble: torch.Tensor = None,
+             to_one_hot=False,
+             no_grad=False,
+             output_np=False,
+             output_flat=False):
         """
+        This function takes numpy for some reason and allows a vector
         Evaluate gan and produce an image as numpy array
         :param input_vec: 
         :return: 
         """
         # fixed_noize_vec = torch.FloatTensor(opt.batchSize, nz, 1, 1).normal_(0, 1).to(device)
-        if input_ensemble is not None:
-            matrix_size = input_ensemble.shape
-            input_tensor_2d = torch.from_numpy(input_ensemble).float().to(self.device)
-            input_tensor = input_tensor_2d.transpose(0,1).unsqueeze(2).unsqueeze(3)
-        elif input_vec is not None:
-            vec_size = len(input_vec)
-            input_tensor_1d = torch.from_numpy(input_vec).float().to(self.device)
-            input_tensor = input_tensor_1d.reshape(1, vec_size, 1, 1)
+        if input_latent_ensemble is not None:
+            # matrix_size = input_latent_ensemble.shape
+            # input_tensor_2d = torch.from_numpy(input_latent_ensemble).float().to(self.device)
+            input_tensor_4d = input_latent_ensemble.unsqueeze(2).unsqueeze(3)
+        # elif input_vec is not None:
+        #     vec_size = len(input_vec)
+        #     input_tensor_1d = torch.from_numpy(input_vec).float().to(self.device)
+        #     input_tensor = input_tensor_1d.reshape(1, vec_size, 1, 1)
         else:
             raise ValueError("Either input_ensemble or input_vec must be provided.")
 
-        with torch.no_grad():
-            x_fake = self.netG(input_tensor).detach()
+        if no_grad:
+            with torch.no_grad():
+                x_fake = self.netG(input_tensor_4d).detach()
+        else:
+            x_fake = self.netG(input_tensor_4d).detach()
 
         if to_one_hot:
             one_hot = torch.nn.functional.one_hot(torch.argmax(x_fake[:,:3,:,:], dim=1), num_classes=3).float()
@@ -80,7 +89,7 @@ class GanEvaluator:
 
         x_fake_np = x_fake.cpu().numpy()
 
-        if input_vec is not None:
+        if output_flat:
             x_fake_np = x_fake_np.reshape(self.number_channels, self.image_size, self.image_size)
 
         return x_fake_np

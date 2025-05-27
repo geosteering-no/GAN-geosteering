@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch
 from PIL import Image, ImageOps
 
 
@@ -22,7 +23,8 @@ counter = 0
 
 for _ in range(3000):
     my_vec = np.random.normal(size=vec_size)
-    result = gan_evaluator.eval(input_vec=my_vec, to_one_hot=True, output_np=False)
+    my_tensor = torch.Tensor(my_vec).unsqueeze(0).to(device)  # Add batch dimension and move to device
+    result = gan_evaluator.eval(input_latent_ensemble=my_tensor, to_one_hot=True, output_np=False)
 
     columns = vector_to_image.image_to_columns(result)
 
