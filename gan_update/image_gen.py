@@ -34,7 +34,7 @@ gan_evaluator = vector_to_image.GanEvaluator(file_name, vec_size, number_chanels
 
 counter = 0
 
-for _ in range(3000):
+for _ in range(30):
     my_vec = np.random.normal(size=vec_size)
     my_tensor = torch.tensor(my_vec.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)  # Add batch dimension and move to device
     result = gan_evaluator.eval(input_latent_ensemble=my_tensor, to_one_hot=True, output_np=False)
