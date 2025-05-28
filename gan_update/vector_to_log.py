@@ -11,9 +11,8 @@ import image_to_log
 import vector_to_image
 
 class FullModel:
-    def __init__(self, latent_size, gan_save_file,
-                 proxi_input_shape, proxi_output_shape, proxi_save_file, proxi_scalers=None,
-                 gan_output_height=64, num_img_channels=6, device='cpu'):
+    def __init__(self, latent_size, gan_save_file, proxi_input_shape, proxi_output_shape, proxi_save_file,
+                 proxi_scalers=None, gan_output_height=64, num_img_channels=6, device='cpu', gan_correct_orientation=False):
 
         if proxi_scalers is None:
             # error
@@ -24,6 +23,7 @@ class FullModel:
         self.gan_evaluator = vector_to_image.GanEvaluator(gan_save_file, latent_size, number_chanels=num_img_channels, device=device)
         self.gan_output_height = gan_output_height
         self.gan_channels = num_img_channels
+        self.gan_correct_orientation = gan_correct_orientation
         # when we load the wrapper the gan model is already in eval mode
 
         # pad the image to the input size
@@ -73,6 +73,8 @@ class FullModel:
         """
         # Generate image from latent vector
         gan_output = self.gan_evaluator.eval(input_latent_ensemble=x, to_one_hot=True)
+        if self.gan_correct_orientation:
+            gan_output = gan_output.permute(0,1,3,2)
 
         resistivity_padded = self.convert_to_resistivity_format(gan_output, index_vector)
 
@@ -115,6 +117,7 @@ if __name__ == "__main__":
         proxi_output_shape=output_shape,
         gan_output_height=64,
         num_img_channels=6,
+        gan_correct_orientation=True,
         device=device
     )
 
@@ -125,6 +128,7 @@ if __name__ == "__main__":
     index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
 
     image, resistivity, logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw, output_transien_results=True)
+    pad_top = full_model.pad_top
 
     if test_gradients:
         my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
@@ -150,17 +154,49 @@ if __name__ == "__main__":
         'UHAA', 'UHAP'
     ]
     tool_configs = [f'{f} khz - {s} ft' for f, s in zip([6., 12., 24., 24., 48., 96.], [83., 83., 83., 43., 43., 43.])]
-    lines = []
+
     for i in range(log_types):
-        plt.figure()
-        plt.title(names[i])
+        fig, (ax_img, ax_res, ax_logs) = plt.subplots(
+            3, 1, figsize=(10, 8), sharex=True, height_ratios=[1, 2, 6]
+        )
+
+        # plotting the image
+        num_cols = image.shape[3]
+        # note, that the image is rotated weirdly in the current training
+        img = image[0, 0:3, :, :].permute(1, 2, 0).cpu().numpy()  # shape: [64, 64, 3]
+        ax_img.imshow(img, extent=(-0.5, num_cols - 0.5, pad_top, pad_top+image.shape[2]),
+                      aspect='auto', interpolation='none')
+        ax_img.set_title("Facies image")
+
+        # plotting resistivity
+        img_res = resistivity[:, 0, :].T.cpu().numpy()  # shape: [H, W]
+        ax_res.imshow(img_res, extent=(-0.5, num_cols - 0.5, 0, resistivity.shape[2]),
+                      aspect='auto', interpolation='none', cmap='summer')
+        ax_res.set_title("Resistivity input")
+
+        # plotting logging locations
+        mask = resistivity[:, 2, :].T.cpu().numpy()  # shape: [H, W]
+        rgba = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.float32)
+        rgba[..., 0:3] = 0.0  # black color
+        rgba[..., 3] = (mask != 0).astype(np.float32)  # alpha: 1 for non-zero, 0 for zero
+
+        ax_res.imshow(rgba, extent=(-0.5, num_cols - 0.5, 0, resistivity.shape[2]),
+                      aspect='auto', interpolation='none')
+
+        # plotting the logs
+        ax_logs.set_title(names[i])
         logs_to_plot = logs_np[:, :, i]  # take the first batch and first channel
         for j, config in enumerate(tool_configs):
-            plt.plot(logs_to_plot[:, j], label=config)
-        plt.savefig(f'logs/log_{i}_{device}.png', bbox_inches='tight')
+            ax_logs.plot(logs_to_plot[:, j], label=config)
+
+        # saving
+        fig.savefig(f'logs/log_{i}_{device}.png', bbox_inches='tight')
+
+        # break
+
         if i == 0:
-            plt.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-            plt.savefig(f'logs/log_{i}_{device}_with_legend.png', bbox_inches='tight')
+            ax_logs.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
+            fig.savefig(f'logs/log_{i}_{device}_with_legend.png', bbox_inches='tight')
 
     plt.show()
 
