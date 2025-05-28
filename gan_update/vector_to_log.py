@@ -67,7 +67,7 @@ class FullModel:
 
         return resistivity_padded_flat
 
-    def forward(self, x, index_vector):
+    def forward(self, x, index_vector, output_transien_results=False):
         """
         the output is flattened in batch and width dimensions
         """
@@ -78,10 +78,13 @@ class FullModel:
 
         # Convert image to log
         em_output = self.em_model.image_to_log(resistivity_padded)
-
-        return em_output
+        if not output_transien_results:
+            return em_output
+        else:
+            return gan_output, resistivity_padded, em_output
 
 if __name__ == "__main__":
+    test_gradients = False
     # fix seeds
     seed = 777
     set_global_seed(seed)
@@ -121,16 +124,16 @@ if __name__ == "__main__":
     # make index vector with all ints = 32
     index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
 
-    logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw)
+    image, resistivity, logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw, output_transien_results=True)
 
-    my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
-    index_tensor_bw = torch.full((1, 2), fill_value=32, dtype=torch.long).to(device)
-    jacobean = torch.autograd.functional.jacobian(lambda x: full_model.forward(x, index_vector=index_tensor_bw),
-                                                  my_latent_tensor,
-                                                  create_graph=False,
-                                                  vectorize=True)
-
-    jacobean_np = jacobean.cpu().detach().numpy()
+    if test_gradients:
+        my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
+        index_tensor_bw = torch.full((1, 2), fill_value=32, dtype=torch.long).to(device)
+        jacobean = torch.autograd.functional.jacobian(lambda x: full_model.forward(x, index_vector=index_tensor_bw),
+                                                      my_latent_tensor,
+                                                      create_graph=False,
+                                                      vectorize=True)
+        jacobean_np = jacobean.cpu().detach().numpy()
 
     logs_np = logs.cpu().detach().numpy()
 
