@@ -12,8 +12,14 @@ import vector_to_image
 
 class FullModel:
     def __init__(self, latent_size, gan_save_file,
-                 proxi_input_shape, proxi_output_shape, proxi_save_file,
+                 proxi_input_shape, proxi_output_shape, proxi_save_file, proxi_scalers=None,
                  gan_output_height=64, num_img_channels=6, device='cpu'):
+
+        if proxi_scalers is None:
+            # error
+            # todo: fix this
+            raise ValueError("proxi_scalers must be provided")
+
 
         self.gan_evaluator = vector_to_image.GanEvaluator(gan_save_file, latent_size, number_chanels=num_img_channels, device=device)
         self.gan_output_height = gan_output_height
@@ -29,9 +35,9 @@ class FullModel:
 
         # Initialize EM model
         self.proxi_input_shape = proxi_input_shape
-        self.em_model = (image_to_log.EMProxy(proxi_input_shape, proxi_output_shape,
-                                             checkpoint_path=proxi_save_file)
-                         .to(device))
+        self.em_model = image_to_log.EMProxy(proxi_input_shape, proxi_output_shape,
+                                             checkpoint_path=proxi_save_file).to(device)
+
         # in case the model needs to be put in the eval mode
         self.em_model.eval()
         self.em_model.requires_grad_(False)
