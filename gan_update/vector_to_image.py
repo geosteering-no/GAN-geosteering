@@ -101,7 +101,7 @@ class GanEvaluator:
 
             diff = soft_output - one_hot_output
 
-            return one_hot
+            return one_hot_output
 
 
         if not output_np:
