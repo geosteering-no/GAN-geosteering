@@ -80,21 +80,26 @@ class GanEvaluator:
             x_fake = self.netG(input_tensor_4d)
 
         if to_one_hot:
-            # one_hot = torch.nn.functional.one_hot(torch.argmax(x_fake[:,:3,:,:], dim=1), num_classes=3).float()
-            logits = x_fake[:, :3, :, :]  # shape: [B, 3, H, W]
-            # todo check tau values
-            # todo check if hard makes sense or not
-            # implementation of gumbel softmax (chatGPT based):
-            # if hard:
-            #     y_hard = one_hot(torch.argmax(y_soft))
-            #     output = (y_hard - y_soft).detach() + y_soft
-            # else:
-            #     output = y_soft
-            soft_onehot = F.gumbel_softmax(logits.permute(0, 2, 3, 1), tau=0.1, hard=True)
-            # permute to fit the original structure
-            soft_onehot = soft_onehot.permute(0, 3, 1, 2)  # back to [B, 3, H, W]
-            soft_output = torch.cat([soft_onehot, x_fake[:, 3:, :, :]], dim=1)
-            return soft_output
+            one_hot = torch.nn.functional.one_hot(torch.argmax(x_fake[:,:3,:,:], dim=1), num_classes=3).float()
+            one_hot = one_hot.permute(0, 3, 1, 2)  # back to [B, 3, H, W]
+            one_hot_output = torch.cat([one_hot, x_fake[:, 3:, :, :]], dim=1)
+            return one_hot_output
+
+            # todo below is experimental
+            # logits = x_fake[:, :3, :, :]  # shape: [B, 3, H, W]
+            # # todo check tau values
+            # # todo check if hard makes sense or not
+            # # implementation of gumbel softmax (chatGPT based):
+            # # if hard:
+            # #     y_hard = one_hot(torch.argmax(y_soft))
+            # #     output = (y_hard - y_soft).detach() + y_soft
+            # # else:
+            # #     output = y_soft
+            # soft_onehot = F.gumbel_softmax(logits.permute(0, 2, 3, 1), tau=0.1, hard=True)
+            # # permute to fit the original structure
+            # soft_onehot = soft_onehot.permute(0, 3, 1, 2)  # back to [B, 3, H, W]
+            # soft_output = torch.cat([soft_onehot, x_fake[:, 3:, :, :]], dim=1)
+            # return soft_output
 
         if not output_np:
             # this will always be 4d tensor
