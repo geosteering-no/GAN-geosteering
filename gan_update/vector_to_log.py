@@ -81,7 +81,7 @@ if __name__ == "__main__":
     set_global_seed(seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = 'cpu'  # for testing purposes, use CPU
+    # device = 'cpu'  # for testing purposes, use CPU
 
     file_name = 'grdecl_15_15_1_60/netG_epoch_15000.pth'
     vec_size = 60
@@ -127,16 +127,30 @@ if __name__ == "__main__":
     logs_np = logs.cpu().detach().numpy()
 
     cols, setups, log_types = logs_np.shape
-    names = [f'log_{i}' for i in range(log_types)]
-    # todo figure out log names
-    names[0] = 'my log 0'
-    names[10] = 'my very special log'
+    names = [
+        'real(xx)', 'img(xx)',
+        'real(yy)', 'img(yy)',
+        'real(zz)', 'img(zz)',
+        'real(xz)', 'img(xz)',
+        'real(zx)', 'img(zx)',
+        'USDA', 'USDP',
+        'UADA', 'UADP',
+        'UHRA', 'UHRP',
+        'UHAA', 'UHAP'
+    ]
+    tool_configs = [f'{f} khz - {s} ft' for f, s in zip([6., 12., 24., 24., 48., 96.], [83., 83., 83., 43., 43., 43.])]
+    lines = []
     for i in range(log_types):
         plt.figure()
         plt.title(names[i])
         logs_to_plot = logs_np[:, :, i]  # take the first batch and first channel
-        plt.plot(logs_to_plot)
-        plt.savefig(f'logs/log_{i}.png', bbox_inches='tight')
+        for j, config in enumerate(tool_configs):
+            plt.plot(logs_to_plot[:, j], label=config)
+        plt.savefig(f'logs/log_{i}_{device}.png', bbox_inches='tight')
+        if i == 0:
+            plt.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
+            plt.savefig(f'logs/log_{i}_{device}_with_legend.png', bbox_inches='tight')
+
     plt.show()
 
 
