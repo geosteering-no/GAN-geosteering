@@ -136,6 +136,7 @@ if __name__ == "__main__":
         plt.title(names[i])
         logs_to_plot = logs_np[:, :, i]  # take the first batch and first channel
         plt.plot(logs_to_plot)
+        plt.savefig(f'logs/log_{i}.png', bbox_inches='tight')
     plt.show()
 
 
