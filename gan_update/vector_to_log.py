@@ -36,7 +36,7 @@ class FullModel:
         # Initialize EM model
         self.proxi_input_shape = proxi_input_shape
         self.em_model = image_to_log.EMProxy(proxi_input_shape, proxi_output_shape,
-                                             checkpoint_path=proxi_save_file).to(device)
+                                             checkpoint_path=proxi_save_file, scaler=proxi_scalers).to(device)
 
         # in case the model needs to be put in the eval mode
         self.em_model.eval()
@@ -98,6 +98,7 @@ if __name__ == "__main__":
     output_shape = (6, 18)
 
     weights_folder = "../../UTA-proxy/training_results"
+    scalers_folder = weights_folder
     # check path by converting string to path
     model_index = 770
     full_em_model_file_name = f'{weights_folder}/checkpoint_{model_index}.pth'
@@ -106,6 +107,7 @@ if __name__ == "__main__":
         latent_size=vec_size,
         gan_save_file=file_name,
         proxi_save_file=full_em_model_file_name,
+        proxi_scalers=scalers_folder,
         proxi_input_shape=input_shape,
         proxi_output_shape=output_shape,
         gan_output_height=64,
