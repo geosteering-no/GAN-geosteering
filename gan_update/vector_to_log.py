@@ -141,6 +141,10 @@ if __name__ == "__main__":
 
     logs_np = logs.cpu().detach().numpy()
 
+    # dump resistivity to numpy
+    resistivity_np = resistivity.cpu().detach().numpy()
+    np.savez('logs/resistivity.npz', resistivity=resistivity_np)
+
     cols, setups, log_types = logs_np.shape
     names = [
         'real(xx)', 'img(xx)',
