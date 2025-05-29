@@ -141,6 +141,10 @@ if __name__ == "__main__":
 
     logs_np = logs.cpu().detach().numpy()
 
+    # the images are upside down, so we need to flip them
+    image = image.flip([2])
+    resistivity = resistivity.flip([2])
+
     # dump resistivity to numpy
     resistivity_np = resistivity.cpu().detach().numpy()
     np.savez('logs/resistivity.npz', resistivity=resistivity_np)
@@ -171,12 +175,14 @@ if __name__ == "__main__":
         ax_img.imshow(img, extent=(-0.5, num_cols - 0.5, pad_top, pad_top+image.shape[2]),
                       aspect='auto', interpolation='none')
         ax_img.set_title("Facies image")
+        ax_img.set_ylim(pad_top+image.shape[2], pad_top)
 
         # plotting resistivity
         img_res = resistivity[:, 0, :].T.cpu().numpy()  # shape: [H, W]
         ax_res.imshow(img_res, extent=(-0.5, num_cols - 0.5, 0, resistivity.shape[2]),
                       aspect='auto', interpolation='none', cmap='summer')
         ax_res.set_title("Resistivity input")
+
 
         # plotting logging locations
         mask = resistivity[:, 2, :].T.cpu().numpy()  # shape: [H, W]
@@ -186,6 +192,7 @@ if __name__ == "__main__":
 
         ax_res.imshow(rgba, extent=(-0.5, num_cols - 0.5, 0, resistivity.shape[2]),
                       aspect='auto', interpolation='none')
+        ax_res.set_ylim(resistivity.shape[2], 0)
 
         # plotting the logs
         ax_logs.set_title(names[i])
@@ -194,13 +201,13 @@ if __name__ == "__main__":
             ax_logs.plot(logs_to_plot[:, j], label=config)
 
         # saving
-        fig.savefig(f'logs/log_{i}_{device}.png', bbox_inches='tight')
+        fig.savefig(f'logs/log_{i}_{device}.png', bbox_inches='tight', dpi=300)
 
         # break
 
         if i == 0:
             ax_logs.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-            fig.savefig(f'logs/log_{i}_{device}_with_legend.png', bbox_inches='tight')
+            fig.savefig(f'logs/log_{i}_{device}_with_legend.png', bbox_inches='tight', dpi=300)
 
     plt.show()
 
