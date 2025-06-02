@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    weights_folder = "../../UTA-proxy/training_results"
+    weights_folder = "../../UTA-proxy/training_results_85"
     scaler_folder = weights_folder
     # check path by converting string to path
     weights_folder_path = os.path.abspath(weights_folder)

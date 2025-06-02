@@ -102,7 +102,7 @@ if __name__ == "__main__":
     input_shape = (3, 128)
     output_shape = (6, 18)
 
-    weights_folder = "../../UTA-proxy/training_results"
+    weights_folder = "../../UTA-proxy/training_results_85"
     scalers_folder = weights_folder
     # check path by converting string to path
     model_index = 770
