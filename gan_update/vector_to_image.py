@@ -39,7 +39,10 @@ class GanEvaluator:
                 device)
         netG.apply(myutils.weights_init)
         print('Loading GAN from {}'.format(load_file_name))
-        netG.load_state_dict(torch.load(load_file_name, map_location=device))
+        if 'https://' in load_file_name:
+            netG.load_state_dict(torch.hub.load_state_dict_from_url(load_file_name, map_location=device))
+        else:
+            netG.load_state_dict(torch.load(load_file_name, map_location=device))
         netG.eval()
         netG.requires_grad_(False)
 
