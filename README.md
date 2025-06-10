@@ -1,7 +1,15 @@
 # GAN-geosteering
 The code to reproduce the results of the paper ["DISTINGUISH workflow: a new paradigm of dynamic well placement using generative machine learning"](#cite-as) presented at ECMOR 2024.
 
+## Updates towards fully open-source dependences
+
 **This repository is a work in progress, and some of the dependencies are not open yet due to contractual obligations.** We are working on opening all the components or replacing them with open analogs. Please create an issue to stay up-to-date with the developments. 
+
+Curently, the updated latent-vector-to-logs fully machine-learning simulator is grouped in the sub-folder [gan_update](https://github.com/geosteering-no/GAN-geosteering/tree/main/gan_update). 
+
+To run full modeling sequence, use [vector_to_log.py](https://github.com/geosteering-no/GAN-geosteering/blob/main/gan_update/vector_to_log.py)
+
+We will likely move it to a separate repository when the setup is further verified. 
 
 ## Cite as:
 
