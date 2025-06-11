@@ -5,12 +5,12 @@ import random
 
 import torch.nn.functional as F
 
-from model_scaler import MinMaxScaler
-from mymodel import EMConvModel
+# from model_scaler import MinMaxScaler
+# from mymodel import EMConvModel
 
 # this does not work in the current setup
-# from udar_proxi.model_scaler import MinMaxScaler
-# from udar_proxi.mymodel import EMConvModel
+from udar_proxi.model_scaler import MinMaxScaler
+from udar_proxi.mymodel import EMConvModel
 
 
 class EMProxy(EMConvModel):
