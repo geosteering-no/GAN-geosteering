@@ -2,3 +2,6 @@ Total processing time for 1 inputs with total 1 log positions is 0.1647305488586
 Total processing time for 1 inputs with total 64 log positions is 0.19098997116088867s
 Total processing time for 1000 inputs with total 64000 log positions is 0.8173351287841797s
 Total processing time for 1 inputs with total 64 log positions is 0.20261478424072266s 
+Total processing time for 1 inputs with total 64 log positions is 0.18066859245300293s 
+Total processing time for 1 inputs with total 64 log positions is 0.17801427841186523s 
+Total processing time for 1 inputs with total 64 log positions is 0.20719027519226074s 

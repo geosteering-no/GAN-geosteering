@@ -160,11 +160,13 @@ if __name__ == "__main__":
 
     # the images are upside down, so we need to flip them
     image = image.flip([2])
-    resistivity = resistivity.flip([2])
+    # resistivity = resistivity.flip([2])
 
     # dump resistivity to numpy
     resistivity_np = resistivity.cpu().detach().numpy()
     np.savez('logs/resistivity.npz', resistivity=resistivity_np)
+
+    resistivity = resistivity.flip([2])
 
     cols, setups, log_types = logs_np.shape
     names = [
