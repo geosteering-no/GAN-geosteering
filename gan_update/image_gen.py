@@ -34,10 +34,25 @@ gan_evaluator = vector_to_image.GanEvaluator(file_name, vec_size, number_chanels
 
 counter = 0
 
+import time
+
 for _ in range(30):
     my_vec = np.random.normal(size=vec_size)
-    my_tensor = torch.tensor(my_vec.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)  # Add batch dimension and move to device
+    my_tensor = torch.tensor(my_vec.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
+
+    #my_vec = np.random.normal(size=(1000,vec_size))
+    #my_tensor = torch.tensor(my_vec.tolist(), dtype=torch.float32, requires_grad=True).to(device)  # Add batch dimension and move to device
+
+
+    start_time = time.time()
     result = gan_evaluator.eval(input_latent_ensemble=my_tensor, to_one_hot=True, output_np=False)
+    end_time = time.time()
+
+    if counter == 0:
+        with open('speed_test/vector_to_image_speed.txt', 'a') as f:
+            f.write(f'Total processing time for {my_tensor.shape[0]} input vectors is {end_time-start_time}s \n')
+            # exit()
+
 
     # this is for debugging purposes, uncomment to see the autograd tree
     # trace_autograd_tree(result)
