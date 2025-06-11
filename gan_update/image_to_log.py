@@ -4,15 +4,19 @@ import torch
 import random
 
 import torch.nn.functional as F
-from model_scaler import MinMaxScaler
+from udar_proxi.model_scaler import MinMaxScaler
 
-from mymodel import EMConvModel
+from udar_proxi.mymodel import EMConvModel
 
 
 class EMProxy(EMConvModel):
     def __init__(self, input_shape, output_shape, checkpoint_path=None, device='cpu', scaler=None, copy_to_dir=None):
         super(EMProxy, self).__init__(input_shape, output_shape)
-        checkpoint = torch.load(checkpoint_path, map_location=device)
+        if 'https://' in checkpoint_path:
+            # load from URL
+            checkpoint = torch.hub.load_state_dict_from_url(checkpoint_path, map_location=device)
+        else:
+            checkpoint = torch.load(checkpoint_path, map_location=device)
         self.load_state_dict(checkpoint['model_state_dict'])
         self.eval()
         if scaler is None:

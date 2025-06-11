@@ -137,6 +137,7 @@ if __name__ == "__main__":
                                                       my_latent_tensor,
                                                       create_graph=False,
                                                       vectorize=True)
+        # TODO: in the jacobean example we need to pass the to_one_hot=False which is not supported all the way...
         jacobean_np = jacobean.cpu().detach().numpy()
 
     logs_np = logs.cpu().detach().numpy()
