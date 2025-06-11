@@ -16,7 +16,8 @@ import random
 
 
 class GanEvaluator:
-    def __init__(self, load_file_name, vec_size, output_size=64, number_chanels=6, device='cpu', num_gpus=0):
+    def __init__(self, load_file_name, vec_size, output_size=64, number_chanels=6, device='cpu', num_gpus=0,
+                 copy_to_dir=None):
         """
 
         """
@@ -48,6 +49,12 @@ class GanEvaluator:
         self.number_channels = number_chanels
         self.image_size = imageSize
         self.device = device
+
+        if copy_to_dir is not None:
+            import shutil
+            import os
+            shutil.copy(load_file_name, os.path.join(copy_to_dir, os.path.basename(load_file_name)))
+            print('The GAN model has been saved to ' + copy_to_dir)
 
     def eval(self,
              input_latent_ensemble: torch.Tensor = None,
@@ -155,4 +162,10 @@ def set_global_seed(seed: int):
 
 
 if __name__ == "__main__":
-    pass
+    # this will copy the weights only
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    file_name = 'grdecl_15_15_1_60/netG_epoch_15000.pth'
+    vec_size = 60
+    gan_evaluator = GanEvaluator(file_name, vec_size, number_chanels=6, device=device,
+                                 copy_to_dir='../../vector_to_log_weights/gan')
+    

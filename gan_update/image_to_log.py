@@ -10,7 +10,7 @@ from mymodel import EMConvModel
 
 
 class EMProxy(EMConvModel):
-    def __init__(self, input_shape, output_shape, checkpoint_path=None, device='cpu', scaler=None):
+    def __init__(self, input_shape, output_shape, checkpoint_path=None, device='cpu', scaler=None, copy_to_dir=None):
         super(EMProxy, self).__init__(input_shape, output_shape)
         checkpoint = torch.load(checkpoint_path, map_location=device)
         self.load_state_dict(checkpoint['model_state_dict'])
@@ -23,6 +23,12 @@ class EMProxy(EMConvModel):
         else:
             # presume that's a path to the scaler file
             self.scaler = MinMaxScaler(scaler_file_path=scaler, device=device)
+        if copy_to_dir is not None:
+            import shutil
+            import os
+            shutil.copy(checkpoint_path, os.path.join(copy_to_dir, os.path.basename(checkpoint_path)))
+            self.scaler.save_scalers(copy_to_dir)
+            print('The EM model has been saved to ' + copy_to_dir)
 
     def to(self, device):
         """
@@ -95,7 +101,10 @@ if __name__ == "__main__":
     input_shape = (3, 128)
     output_shape = (6, 18)
 
-    model = EMProxy(input_shape, output_shape, checkpoint_path=checkpoint_path, scaler=scaler_folder).to(device)
+    model = EMProxy(input_shape, output_shape, checkpoint_path=checkpoint_path,
+                    scaler=scaler_folder,
+                    copy_to_dir='../../vector_to_log_weights/em'
+                    ).to(device)
 
     # model.eval()  # Set to evaluation mode unnecessary here, as it is already done in the constructor
 
