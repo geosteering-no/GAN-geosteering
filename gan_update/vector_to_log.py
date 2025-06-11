@@ -122,13 +122,29 @@ if __name__ == "__main__":
     )
 
     # example usage
+    # ensemble_size = 1000
+    # my_latent_vec_np = np.random.normal(size=(ensemble_size,vec_size))
+    # my_latent_tensor = torch.tensor(my_latent_vec_np, dtype=torch.float32).to(
+    #     device)  # Add batch dimension and move to device
+    # index_tensor_bw = torch.full((ensemble_size, 64), fill_value=32, dtype=torch.long).to(device)
+
     my_latent_vec_np = np.random.normal(size=vec_size)
     my_latent_tensor = torch.tensor(my_latent_vec_np, dtype=torch.float32).unsqueeze(0).to(device)  # Add batch dimension and move to device
     # make index vector with all ints = 32
-    index_tensor_bw = torch.full((1, 64), fill_value=32, dtype=torch.long).to(device)
+    index_tensor_bw = torch.full((1, 1), fill_value=32, dtype=torch.long).to(device)
 
+    import time
+
+    start_time = time.time()
     image, resistivity, logs = full_model.forward(my_latent_tensor, index_vector=index_tensor_bw, output_transien_results=True)
     pad_top = full_model.pad_top
+
+    end_time = time.time()
+
+    print(f'Total processing time for {my_latent_tensor.shape[0]} inputs with total {logs.shape[0]} log positions is {end_time-start_time} s')
+
+    with open('speed_test/image_to_log_speed.txt','a') as f:
+        f.write(f'Total processing time for {my_latent_tensor.shape[0]} inputs with total {logs.shape[0]} log positions is {end_time-start_time}s \n')
 
     if test_gradients:
         my_latent_tensor = torch.tensor(my_latent_vec_np.tolist(), dtype=torch.float32, requires_grad=True).unsqueeze(0).to(device)
