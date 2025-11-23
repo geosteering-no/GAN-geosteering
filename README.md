@@ -4,7 +4,7 @@ The code to reproduce the results of the paper ["DISTINGUISH workflow: a new par
 ## Updates towards fully open-source dependencies
 
 **This repository is not fully reproducible because some dependencies cannot be open-source due to contractual obligations.** 
-The **updated workflow with a new UDAR model is now available, see (/geosteering-no/DISTINGUISH-WF)[/geosteering-no/DISTINGUISH-WF]**
+The **updated workflow with a new UDAR model is now available, see [/geosteering-no/DISTINGUISH-WF](/geosteering-no/DISTINGUISH-WF)**
 
 ## Cite as:
 
